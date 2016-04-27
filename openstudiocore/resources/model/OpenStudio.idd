@@ -17972,7 +17972,7 @@ OS:EvaporativeCooler:Direct:ResearchSpecial,
        \required-field
        \units W/(m3/s)
        \note this field is used when the previous field is set to autosize. The pump power is scaled with Primary Air Design Air Flow Rate
-  A8?  \field Water Pump Power Modifier Curve Name
+  A8,  \field Water Pump Power Modifier Curve Name
        \note this curve modifies the pump power in the previous field by multiplying the design power by the result of this curve.
        \note x = ff = flow fraction on the primary air.  The flow fraction is the secondary air flow rate during current operation divided
        \note by Primary Air Design Flow Rate
