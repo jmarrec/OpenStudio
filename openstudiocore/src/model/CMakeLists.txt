@@ -32,8 +32,15 @@ set(${target_name}_src
   ModelObjectList.cpp
   FileOperations.hpp
   FileOperations.cpp
-  ThreeJS.hpp
-  ThreeJS.cpp
+
+  FloorplanJSForwardTranslator.hpp
+  FloorplanJSForwardTranslator.cpp
+  ThreeJSForwardTranslator.hpp
+  ThreeJSForwardTranslator.cpp
+  ThreeJSReverseTranslator.hpp
+  ThreeJSReverseTranslator.cpp
+  ModelMerger.hpp
+  ModelMerger.cpp
   
   ConcreteModelObjects.hpp
   AirConditionerVariableRefrigerantFlow.hpp
@@ -150,12 +157,12 @@ set(${target_name}_src
   BuildingUnit.hpp
   BuildingUnit_Impl.hpp
   BuildingUnit.cpp
-##  CentralHeatPumpSystem.hpp
-##  CentralHeatPumpSystem_Impl.hpp
-##  CentralHeatPumpSystem.cpp
-##  CentralHeatPumpSystemModule.hpp
-##  CentralHeatPumpSystemModule_Impl.hpp
-##  CentralHeatPumpSystemModule.cpp
+  CentralHeatPumpSystem.hpp
+  CentralHeatPumpSystem_Impl.hpp
+  CentralHeatPumpSystem.cpp
+  CentralHeatPumpSystemModule.hpp
+  CentralHeatPumpSystemModule_Impl.hpp
+  CentralHeatPumpSystemModule.cpp
   CFactorUndergroundWallConstruction.hpp
   CFactorUndergroundWallConstruction_Impl.hpp
   CFactorUndergroundWallConstruction.cpp
@@ -168,9 +175,9 @@ set(${target_name}_src
   ChillerElectricEIR.hpp
   ChillerElectricEIR_Impl.hpp
   ChillerElectricEIR.cpp
-##  ChillerHeaterPerformanceElectricEIR.hpp
-##  ChillerHeaterPerformanceElectricEIR_Impl.hpp
-##  ChillerHeaterPerformanceElectricEIR.cpp
+  ChillerHeaterPerformanceElectricEIR.hpp
+  ChillerHeaterPerformanceElectricEIR_Impl.hpp
+  ChillerHeaterPerformanceElectricEIR.cpp
   ClimateZones.hpp
   ClimateZones_Impl.hpp
   ClimateZones.cpp
@@ -1220,6 +1227,9 @@ set(${target_name}_src
   Version.hpp
   Version_Impl.hpp
   Version.cpp
+  UnitarySystemPerformanceMultispeed.hpp
+  UnitarySystemPerformanceMultispeed_Impl.hpp
+  UnitarySystemPerformanceMultispeed.cpp
   UtilityBill.hpp
   UtilityBill_Impl.hpp
   UtilityBill.cpp
@@ -1459,12 +1469,12 @@ set(${target_name}_test_src
   test/BuildingStory_GTest.cpp
   test/BuildingUnit_GTest.cpp
   test/Building_GTest.cpp
-##  test/CentralHeatPumpSystem_GTest.cpp
-##  test/CentralHeatPumpSystemModule_GTest.cpp
+  #test/CentralHeatPumpSystem_GTest.cpp
+  #test/CentralHeatPumpSystem_GTest.cpp
   test/ChillerAbsorption_GTest.cpp
   test/ChillerAbsorptionIndirect_GTest.cpp
   test/ChillerElectricEIR_GTest.cpp
-##  test/ChillerHeaterPerformanceElectricEIR_GTest.cpp
+  test/ChillerHeaterPerformanceElectricEIR_GTest.cpp
   test/ClimateZones_GTest.cpp
   test/CoilCoolingCooledBeam_GTest.cpp
   test/CoilCoolingDXSingleSpeed_GTest.cpp
@@ -1550,6 +1560,7 @@ set(${target_name}_test_src
   test/FanZoneExhaust_GTest.cpp
   test/FanOnOff_GTest.cpp
   test/FenestrationMaterial_GTest.cpp
+  test/FloorplanJSForwardTranslator_GTest.cpp
   test/FluidCoolerSingleSpeed_GTest.cpp
   test/FluidCoolerTwoSpeed_GTest.cpp
   test/GasEquipment_GTest.cpp
@@ -1599,6 +1610,7 @@ set(${target_name}_test_src
   test/ModelObject_GTest.cpp
   test/ModelPartitionMaterial_GTest.cpp
   test/Model_GTest.cpp
+  test/ModelMerger_GTest.cpp
   test/Node_GTest.cpp
   test/PortList_GTest.cpp
   test/OpaqueMaterial_GTest.cpp
@@ -1714,7 +1726,9 @@ set(${target_name}_test_src
   test/ThermalStorageIceDetailed_GTest.cpp
   test/ThermalStorageChilledWaterStratified_GTest.cpp
   test/TemperingValve_GTest.cpp
-  test/ThreeJS_GTest.cpp
+  test/ThreeJSForwardTranslator_GTest.cpp
+  test/ThreeJSReverseTranslator_GTest.cpp
+  test/UnitarySystemPerformanceMultispeed_GTest.cpp
   test/UtilityBill_GTest.cpp
   test/WaterHeaterMixed_GTest.cpp
   test/WaterHeaterHeatPump_GTest.cpp
