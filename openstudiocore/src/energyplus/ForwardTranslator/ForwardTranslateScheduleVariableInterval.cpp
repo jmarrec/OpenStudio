@@ -76,7 +76,7 @@ boost::optional<IdfObject> ForwardTranslator::translateScheduleVariableInterval(
   m_idfObjects.push_back(idfObject);
 
   idfObject.setName(modelObject.name().get());
-  
+
   boost::optional<ScheduleTypeLimits> scheduleTypeLimits = modelObject.scheduleTypeLimits();
   if (scheduleTypeLimits){
     boost::optional<IdfObject> idfScheduleTypeLimits = translateAndMapModelObject(*scheduleTypeLimits);
@@ -109,13 +109,14 @@ boost::optional<IdfObject> ForwardTranslator::translateScheduleVariableInterval(
   Date lastDate = firstReportDateTime.date();
   Time dayDelta = Time(1.0);
   // The day number of the date that data was last written relative to the first date
-  //double lastDay = 0.0; 
+  //double lastDay = 0.0;
   int lastDay = 0;
   // Adjust the floating point day delta to be relative to the beginning of the first day and
   // shift the start of the loop if needed
   int secondShift = firstReportDateTime.time().totalSeconds();
   unsigned int start = 0;
   if(secondShift == 0) {
+    // TODO: Shouldn't this be 0? (it will create an (Until 24:00, first value) (for all day) if you do currently though...
     start = 1;
   } else {
     for(unsigned int i=0;i<secondsFromFirst.size();i++) {
@@ -130,14 +131,14 @@ boost::optional<IdfObject> ForwardTranslator::translateScheduleVariableInterval(
   fieldIndex = startNewDay(idfObject,fieldIndex,lastDate);
 
   for(unsigned int i=start; i < values.size()-1; i++){
-    // Loop over the time series values and write out values to the 
+    // Loop over the time series values and write out values to the
     // schedule. This version is based on the seconds from the start
     // of the time series, so should not be vulnerable to round-off.
-    // It was translated from the day version, so there could be 
+    // It was translated from the day version, so there could be
     // issues associated with that.
     //
     // We still have a potential aliasing problem unless the API has
-    // enforced that the times in the time series are all distinct when 
+    // enforced that the times in the time series are all distinct when
     // rounded to the minute. Is that happening?
     int secondsFromStartOfDay = secondsFromFirst[i] % 86400;
     int today = (secondsFromFirst[i]-secondsFromStartOfDay)/86400;
@@ -165,7 +166,7 @@ boost::optional<IdfObject> ForwardTranslator::translateScheduleVariableInterval(
       Time time(0,0,0,secondsFromStartOfDay);
       int hours = time.hours();
       int minutes = time.minutes() + floor((time.seconds()/60.0) + 0.5);
-      // This is a little dangerous, but all of the problematic 24:00 
+      // This is a little dangerous, but all of the problematic 24:00
       // times that might need to cause a day++ should be caught above.
       if(minutes==60){
         hours += 1;
@@ -179,7 +180,7 @@ boost::optional<IdfObject> ForwardTranslator::translateScheduleVariableInterval(
   unsigned int i = values.size()-1;
   // We'll skip a sanity check here, but it might be a good idea to add one at some point
   fieldIndex = addUntil(idfObject,fieldIndex,24,0,values[i]);
-  
+
   return idfObject;
 }
 

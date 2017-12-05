@@ -117,18 +117,21 @@ namespace detail {
   {
     // check the interval
     boost::optional<openstudio::Time> intervalTime = timeSeries.intervalLength();
-    if (!intervalTime){
+    if (!intervalTime) {
+      LOG(Error, "Cannot set a timeseries that doesn't have an intervalLength for " << briefDescription());
       return false;
     }
 
-    // check the interval
+    // check the interval: has to be a whole number of minutes
     double intervalLength = intervalTime->totalMinutes();
-    if (intervalLength - floor(intervalLength) > 0){
+    if (intervalLength - floor(intervalLength) > 0) {
+      LOG(Error, "Cannot set a timeseries where the intervalTime isn't a whole number of minutes for " << briefDescription());
       return false;
     }
 
     // check the interval
-    if (intervalTime->totalDays() > 1){
+    if (intervalTime->totalDays() > 1) {
+      LOG(Error, "Cannot set a timeseries where the intervalTime is larger than a day for " << briefDescription());
       return false;
     }
 
@@ -137,8 +140,12 @@ namespace detail {
     Date startDate = firstReportDateTime.date();
     Time firstReportTime = firstReportDateTime.time();
 
-    double numIntervalsToFirstReport = std::max(1.0, firstReportTime.totalMinutes() / intervalLength);
-    if (numIntervalsToFirstReport - floor(numIntervalsToFirstReport) > 0){
+    // TODO: this doesn't do what the above comment is saying, it allows a first report anywhere below 1 whole interval from start date
+    // Not sure why std::max(1,...) was chosen here...
+    // double numIntervalsToFirstReport = std::max(1.0, firstReportTime.totalMinutes() / intervalLength);
+    double numIntervalsToFirstReport = firstReportTime.totalMinutes() / intervalLength;
+    if (numIntervalsToFirstReport - floor(numIntervalsToFirstReport) > 0) {
+      LOG(Error, "Cannot set a timeseries where the firstReportTime isn't a whole number of intervals from start date for " << briefDescription());
       return false;
     }
 
@@ -171,6 +178,7 @@ namespace detail {
     double outOfRangeValue = timeSeries.outOfRangeValue();
 
     // add in numIntervalsToFirstReport-1 outOfRangeValues to pad the timeseries
+    // TODO: would need to throw out the potential 1 interval before the startDate too if you force it to start on 12 AM (end of reporting = 1:00 AM)
     for (unsigned i = 0; i < numIntervalsToFirstReport - 1; ++i){
       std::vector<std::string> temp;
       temp.push_back(toString(outOfRangeValue));
