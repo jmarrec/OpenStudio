@@ -53,6 +53,7 @@
 #include "../../utilities/data/TimeSeries.hpp"
 #include "../../utilities/core/Compare.hpp"
 #include "../../utilities/core/Optional.hpp"
+#include "../../utilities/core/UUID.hpp"
 
 using namespace openstudio;
 using namespace openstudio::model;
@@ -208,6 +209,41 @@ TEST_F(ModelFixture, EMSSensorDelete) {
   EXPECT_EQ(static_cast<unsigned>(0), model.getModelObjects<AvailabilityManagerHighTemperatureTurnOff>().size());
   //sensor still has keyName as avm UUID string (will not FT though eventually)
   EXPECT_EQ(key, sensor.keyName());
+}
+
+TEST_F(ModelFixture, EMSSensor_LinkedModelObject)
+{
+  Model model;
+
+  ThermalZone zone(model);
+
+  // Good Handle, Good Output Variable: should work
+  EnergyManagementSystemSensor sensor(model, "Zone Mean Air Temperature");
+  sensor.setKeyName(toString(zone.handle()));
+  EXPECT_TRUE(sensor.linkedModelObject());
+  EXPECT_EQ(sensor.linkedModelObject().get().handle(), zone.handle());
+
+  // Bad Handle, Good Output Variable: shouldn't work
+  UUID u = createUUID();
+  sensor.setKeyName(toString(u));
+  EXPECT_FALSE(sensor.linkedModelObject());
+
+  // Good Object Name with appropriate Output Variable
+  sensor.setKeyName(zone.nameString());
+  EXPECT_TRUE(sensor.linkedModelObject());
+  EXPECT_EQ(sensor.linkedModelObject().get().handle(), zone.handle());
+
+
+  // Good Handle, Bad Output Variable: TODO: should that work? I think so...
+  EnergyManagementSystemSensor sensorWrong(model, "GIBBERISH");
+  sensorWrong.setKeyName(toString(zone.handle()));
+  EXPECT_TRUE(sensorWrong.linkedModelObject());
+  EXPECT_EQ(sensorWrong.linkedModelObject().get().handle(), zone.handle());
+
+  // Good Object Name, Bad Output Variable: TODO: should that work? I think not...
+  sensorWrong.setKeyName(zone.nameString());
+  EXPECT_FALSE(sensor.linkedModelObject());
+
 }
 
 
