@@ -45,6 +45,8 @@
 #include "CoilPerformanceDXCooling_Impl.hpp"
 #include "AdditionalProperties.hpp"
 #include "AdditionalProperties_Impl.hpp"
+#include "EnergyManagementSystemSensor.hpp"
+#include "EnergyManagementSystemSensor_Impl.hpp"
 
 #include "ScheduleTypeRegistry.hpp"
 #include "Schedule.hpp"
@@ -1032,15 +1034,20 @@ namespace detail {
   }
 
   /// remove the object from the model, also removes any cost objects associated with this object
+  /// as well as additionalProperties and EMS Sensors
   /// return std::vector<IdfObject> containing any removed object(s)
   std::vector<IdfObject> ModelObject_Impl::remove()
   {
     std::vector<IdfObject> result;
     std::vector<IdfObject> removedCosts = this->removeLifeCycleCosts();
     std::vector<IdfObject> removedProperties = this->removeAdditionalProperties();
+    std::vector<IdfObject> removedEMSSensors = this->removeEnergyManagementSystemSensors();
+
     result = WorkspaceObject_Impl::remove();
     result.insert(result.end(), removedCosts.begin(), removedCosts.end());
     result.insert(result.end(), removedProperties.begin(), removedProperties.end());
+    result.insert(result.end(), removedEMSSensors.begin(), removedEMSSensors.end());
+
     return result;
   }
 
@@ -1150,7 +1157,7 @@ namespace detail {
   std::vector<std::string> ModelObject_Impl::emsInternalVariableNames() const {
     return std::vector<std::string>();
   }
-  
+
   AdditionalProperties ModelObject_Impl::additionalProperties() const {
     AdditionalPropertiesVector candidates = getObject<ModelObject>().getModelObjectSources<AdditionalProperties>();
     if (candidates.size() > 1) {
@@ -1186,6 +1193,53 @@ namespace detail {
     }
     return result;
   }
+
+
+  std::vector<EnergyManagementSystemSensor> ModelObject_Impl::energyManagementSystemSensors() const
+  {
+    std::vector<EnergyManagementSystemSensor> result;
+
+    // Find all sensors in the model
+    std::vector<EnergyManagementSystemSensor> sensors = this->model().getModelObjects<model::EnergyManagementSystemSensor>();
+
+    // To match, the EMSSensor's KeyName should be the handle of this modelObject
+    // TODO: can it be it's string name too? In which case should we also check that the sensor.outputVariableOrMeterName
+    // is in the list of possible this->outputVariableNames?
+    for (const model::EnergyManagementSystemSensor & sensor : sensors) {
+      bool isMatch = false;
+      // If the EMS KeyName is the object's handle, we know for sure
+      if( sensor.keyName() == toString(this->handle()) ) {
+        isMatch = true;
+      // Otherwise, if the KeyName is a string of the object's name
+      } else if (sensor.keyName() == this->nameString() ) {
+        // Because another object from a different Idd Group could be bearing the same name
+        // We also check that it's using one this object's possible outputVariableNames
+        std::vector<std::string> outVarNames = getObject<ModelObject>().outputVariableNames();
+        std::string varName = sensor.outputVariableOrMeterName();
+        if (std::find(std::begin(outVarNames), std::end(outVarNames), varName) != std::end(outVarNames))
+        {
+          isMatch = true;
+        }
+      }
+      if (isMatch) {
+        result.push_back(sensor);
+      }
+    }
+
+    return result;
+  }
+
+  std::vector<IdfObject> ModelObject_Impl::removeEnergyManagementSystemSensors()
+  {
+    std::vector<IdfObject> removedEMSSensors;
+    std::vector<EnergyManagementSystemSensor> emsSensors = this->energyManagementSystemSensors();
+    for (EnergyManagementSystemSensor& emsSensor : emsSensors){
+      std::vector<IdfObject> tmp = emsSensor.remove();
+      removedEMSSensors.insert(removedEMSSensors.end(), tmp.begin(), tmp.end());
+    }
+    return removedEMSSensors;
+  }
+
 
 } // detail
 
@@ -1379,6 +1433,19 @@ std::vector<IdfObject> ModelObject::removeAdditionalProperties()
 {
   return getImpl<detail::ModelObject_Impl>()->removeAdditionalProperties();
 }
+
+
+std::vector<EnergyManagementSystemSensor> ModelObject::energyManagementSystemSensors() const
+{
+  return getImpl<detail::ModelObject_Impl>()->energyManagementSystemSensors();
+}
+
+std::vector<IdfObject> ModelObject::removeEnergyManagementSystemSensors()
+{
+  return getImpl<detail::ModelObject_Impl>()->removeEnergyManagementSystemSensors();
+}
+
+
 
 ModelObject::ModelObject(IddObjectType type, const Model& model, bool fastName)
   : WorkspaceObject(model.getImpl<detail::Model_Impl>()->createObject(IdfObject(type, fastName),false))

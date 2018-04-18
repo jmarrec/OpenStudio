@@ -51,6 +51,7 @@ namespace model {
 class Model;
 class Component;
 class LifeCycleCosts;
+class EnergyManagementSystemSensor;
 
 class FieldViewer;
 
@@ -73,12 +74,6 @@ namespace detail {
    *  should provide an implementation class that derives from ModelObject_Impl. */
   class MODEL_API ModelObject_Impl : public openstudio::detail::WorkspaceObject_Impl {
 
-    //
-    //
-    //
-
-    //
-    //
    public:
 
     /** @name Constructors and Destructors */
@@ -103,6 +98,7 @@ namespace detail {
     virtual ~ModelObject_Impl() {}
 
     /// remove the object from the model, also removes any cost objects associated with this object
+    /// as well as additionalProperties and EMS Sensors
     /// return std::vector<IdfObject> containing any removed object(s)
     virtual std::vector<IdfObject> remove() override;
 
@@ -223,6 +219,11 @@ namespace detail {
 
     /** Removes all additional properties that refer to this object. Returns removed objects. */
     std::vector<IdfObject> removeAdditionalProperties();
+
+
+    std::vector<EnergyManagementSystemSensor> energyManagementSystemSensors() const;
+    std::vector<IdfObject> removeEnergyManagementSystemSensors();
+
 
     //@}
     /** @name Setters */

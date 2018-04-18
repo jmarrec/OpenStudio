@@ -57,6 +57,7 @@ namespace model {
 class Model;
 class Component;
 class LifeCycleCost;
+class EnergyManagementSystemSensor;
 
 class ModelExtensibleGroup;
 
@@ -285,6 +286,12 @@ class MODEL_API ModelObject : public openstudio::WorkspaceObject {
 
   /** Removes all additional properties that refer to this object. Returns removed objects. */
   std::vector<IdfObject> removeAdditionalProperties();
+
+  /** Returns the list of all EnergyManagementSystemSensors that refer to this object. */
+  std::vector<EnergyManagementSystemSensor> energyManagementSystemSensors() const;
+
+  /** Removes all EnergyManagementSystemSensors that refer to this object. Returns removed objects */
+  std::vector<IdfObject> removeEnergyManagementSystemSensors();
 
   //@}
   /** @name Setters */
