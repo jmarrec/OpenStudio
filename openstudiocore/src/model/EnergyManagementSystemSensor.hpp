@@ -81,6 +81,10 @@ class MODEL_API EnergyManagementSystemSensor : public ModelObject {
   boost::optional<OutputMeter> outputMeter() const;
   std::string outputVariableOrMeterName() const;
 
+  /** Checks "Output Variable or Output Meter Index Key Name" to find the (optional) Linked ModelObject **/
+  boost::optional<ModelObject> linkedModelObject() const;
+
+
   //@}
   /** @name Setters */
   //@{

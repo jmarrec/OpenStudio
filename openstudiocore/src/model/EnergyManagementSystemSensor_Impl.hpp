@@ -81,6 +81,10 @@ namespace detail {
 
     boost::optional<OutputVariable> outputVariable() const;
     boost::optional<OutputMeter> outputMeter() const;
+
+    /** Checks "Output Variable or Output Meter Index Key Name" to find the (optional) Linked ModelObject **/
+    boost::optional<ModelObject> linkedModelObject() const;
+
     std::string outputVariableOrMeterName() const;
 
     //@}
@@ -107,6 +111,10 @@ namespace detail {
     // objects should be returned as boost::optionals
     boost::optional<OutputVariable> optionalOutputVariable() const;
     boost::optional<OutputMeter> optionalOutputMeter() const;
+
+    /** Checks "Output Variable or Output Meter Index Key Name" to find the linked ModelObject **/
+    boost::optional<ModelObject> optionalLinkedModelObject() const;
+
   };
 
 } // detail

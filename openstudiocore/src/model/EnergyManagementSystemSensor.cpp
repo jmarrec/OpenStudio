@@ -173,6 +173,58 @@ namespace detail {
     return boost::none;
   }
 
+
+
+  boost::optional<ModelObject> EnergyManagementSystemSensor_Impl::linkedModelObject() const {
+    boost::optional<ModelObject> value = optionalLinkedModelObject();
+    if (!value.is_initialized()) {
+      boost::optional<std::string> _keyName = getString(OS_EnergyManagementSystem_SensorFields::OutputVariableorOutputMeterIndexKeyName);
+      if (_keyName.is_initialized()) {
+        // There is a keyName, but it's not valid!
+        LOG(Warn, " does not have a valid ModelObject for OutputVariableorOutputMeterIndexKeyName: keyName=" << _keyName.get());
+      }
+    }
+      return value;
+  }
+
+  boost::optional<ModelObject> EnergyManagementSystemSensor_Impl::optionalLinkedModelObject() const {
+    //Note: Cant do /object-list implementation since Auto Naming of Objects causes issues.
+    //      Instead, doing an /alpha getString implementation
+    boost::optional<std::string> _keyName = getString(OS_EnergyManagementSystem_SensorFields::OutputVariableorOutputMeterIndexKeyName);
+    const Model m = this->model();
+    if (_keyName) {
+      std::string keyName = _keyName.get();
+      // We try to see if the keyName is a handle
+      if (boost::regex_match(keyName, uuidInString())) {
+        UUID uid = toUUID(keyName);
+        boost::optional<ModelObject> object = m.getModelObject<model::ModelObject>(uid);
+        if (object.is_initialized()) {
+          return object;
+        } else {
+          LOG(Warn, this->briefDescription() << " appears to have a OutputVariableorOutputMeterIndexKeyName has a handle, "
+                    << "but this handle cannot be located in the model");
+        }
+      } else {
+        // Perhaps it's the object's nameString rather than the handle
+        for( const WorkspaceObject& wo: m.getObjectsByName(keyName) ) {
+          boost::optional<ModelObject> _mo = wo.optionalCast<ModelObject>();
+          if (_mo.is_initialized()) {
+            // Because several object from a different Idd Group could be bearing the same name
+            // We also check that it's using one this object's possible outputVariableNames
+            std::vector<std::string> outVarNames = _mo->outputVariableNames();
+            std::string varName = this->outputVariableOrMeterName();
+            if (std::find(std::begin(outVarNames), std::end(outVarNames), varName) != std::end(outVarNames))
+            {
+              return _mo;
+            }
+          }
+        }
+
+      }
+    }
+    return boost::none;
+  }
+
 } // detail
 
 EnergyManagementSystemSensor::EnergyManagementSystemSensor(const Model& model, const OutputVariable& outvar)
@@ -254,6 +306,13 @@ bool EnergyManagementSystemSensor::setOutputMeter(const OutputMeter& outputMeter
 bool EnergyManagementSystemSensor::setOutputVariableOrMeterName(const std::string& outputVariableOrMeterName) {
   return getImpl<detail::EnergyManagementSystemSensor_Impl>()->setOutputVariableOrMeterName(outputVariableOrMeterName);
 }
+
+
+boost::optional<ModelObject> EnergyManagementSystemSensor::linkedModelObject() const {
+  return getImpl<detail::EnergyManagementSystemSensor_Impl>()->linkedModelObject();
+}
+
+
 
 /// @cond
 EnergyManagementSystemSensor::EnergyManagementSystemSensor(std::shared_ptr<detail::EnergyManagementSystemSensor_Impl> impl)
