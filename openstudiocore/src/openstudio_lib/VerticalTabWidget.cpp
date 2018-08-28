@@ -48,6 +48,7 @@ VerticalTabWidget::VerticalTabWidget(QWidget * parent)
   : QWidget(parent)
 {
   auto mainLayout = new QHBoxLayout();
+  mainLayout->setObjectName("VerticalTabWidget mainLayout");
 
   mainLayout->setSpacing(0);
 

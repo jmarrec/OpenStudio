@@ -88,6 +88,7 @@ DarkGradientHeader::DarkGradientHeader(QWidget * parent)
   setStyleSheet(style);
 
   auto mainHLayout = new QHBoxLayout();
+  mainHLayout->setObjectName("DarkGradientHeader mainHLayout");
   mainHLayout->setContentsMargins(5,0,5,0);
   mainHLayout->setSpacing(5);
   setLayout(mainHLayout);
@@ -118,6 +119,7 @@ LightGradientHeader::LightGradientHeader(QWidget * parent)
   setStyleSheet(style);
 
   auto mainHLayout = new QHBoxLayout();
+  mainHLayout->setObjectName("LightGradientHeader mainHLayout");
   mainHLayout->setContentsMargins(5,0,5,0);
   mainHLayout->setSpacing(5);
   setLayout(mainHLayout);
@@ -169,6 +171,7 @@ LightHeader::LightHeader(QWidget * parent)
   setStyleSheet(style);
 
   auto mainHLayout = new QHBoxLayout();
+  mainHLayout->setObjectName("LightHeader mainHLayout");
   mainHLayout->setContentsMargins(5,0,5,0);
   setLayout(mainHLayout);
 

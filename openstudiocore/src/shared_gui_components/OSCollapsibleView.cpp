@@ -58,14 +58,17 @@ OSCollapsibleView::OSCollapsibleView(bool alwaysExpanded, QWidget * parent)
   m_alwaysExpanded(alwaysExpanded)
 {
   auto mainVLayout = new QVBoxLayout();
+  mainVLayout->setObjectName("OSCollapsibleView QVBoxLayout");
   mainVLayout->setContentsMargins(0,0,0,0);
   mainVLayout->setSpacing(0);
   setLayout(mainVLayout);
 
   m_headerContainer = new OSViewSwitcher();
+  m_headerContainer->setObjectName("OSCollapsibleView m_headerContainer");
   mainVLayout->addWidget(m_headerContainer);
 
   m_contentContainer = new OSViewSwitcher();
+  m_contentContainer->setObjectName("OSCollapsibleView m_contentContainer");
   mainVLayout->addWidget(m_contentContainer);
   m_contentContainer->hide();
 }

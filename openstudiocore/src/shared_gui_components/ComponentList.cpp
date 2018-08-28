@@ -73,6 +73,7 @@ void ComponentList::createLayout()
   setStyleSheet(style);
 
   auto outerVLayout = new QVBoxLayout();
+  outerVLayout->setObjectName("ComponentList outerVLayout");
   outerVLayout->setContentsMargins(0,0,0,0);
   this->setLayout(outerVLayout);
 
@@ -81,6 +82,7 @@ void ComponentList::createLayout()
   outerVLayout->addWidget(outerWidget);
 
   m_mainLayout = new QVBoxLayout();
+  m_mainLayout->setObjectName("ComponentList m_mainLayout");
   outerWidget->setLayout(m_mainLayout);
   m_mainLayout->setContentsMargins(0,0,0,0);
   m_mainLayout->setSpacing(0);

@@ -124,6 +124,7 @@ void SubTabView::createLayout()
   addWidget(leftWidget);
 
   auto outerLeftVLayout = new QVBoxLayout();
+  outerLeftVLayout->setObjectName("SubTabView::createLayout outerLeftVLayout");
   outerLeftVLayout->setContentsMargins(0, 0, 0, 0);
   outerLeftVLayout->setSpacing(0);
   leftWidget->setLayout(outerLeftVLayout);
@@ -142,6 +143,7 @@ void SubTabView::createGridViewLayout()
   addWidget(widget);
 
   auto layout = new QVBoxLayout();
+  layout->setObjectName("SubTabView::createGridViewLayout");
   layout->setContentsMargins(0, 0, 0, 0);
   layout->setSpacing(0);
   widget->setLayout(layout);

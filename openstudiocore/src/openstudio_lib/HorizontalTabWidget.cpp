@@ -50,11 +50,9 @@ HorizontalTabWidget::HorizontalTabWidget(QWidget * parent)
   //setObjectName("GrayWidget");
 
   auto mainLayout = new QVBoxLayout();
-
+  mainLayout->setObjectName("HorizontalTabWidget mainLayout");
   mainLayout->setSpacing(0);
-
   mainLayout->setContentsMargins(0,0,0,0);
-
   setLayout(mainLayout);
 
   // Tab bar

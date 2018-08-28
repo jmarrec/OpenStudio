@@ -442,6 +442,7 @@ void Component::createAbridgedLayout()
   QString string;
 
   auto leftLayout = new QVBoxLayout();
+  leftLayout->setObjectName("Component::createAbridgedLayout leftLayout");
 
   string = "Name: ";
   string += m_name;
@@ -487,6 +488,7 @@ void Component::createAbridgedLayout()
 
 
   auto mainLayout = new QHBoxLayout();
+  mainLayout->setObjectName("Component::createAbridgedLayout mainLayout");
   mainLayout->addLayout(leftLayout);
   mainLayout->addStretch();
   mainLayout->addWidget(m_checkBox);
@@ -500,6 +502,7 @@ void Component::createCompleteLayout()
   QString string;
 
   auto mainLayout = new QVBoxLayout();
+  mainLayout->setObjectName("Component::createCompleteLayout mainLayout");
 
   QTableWidget * tableWidget = nullptr;
 

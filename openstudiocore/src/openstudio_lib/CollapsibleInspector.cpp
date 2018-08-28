@@ -54,6 +54,7 @@ void CollapsibleInspector::createLayout()
   setContentsMargins(0,0,0,0);
 
   auto mainLayout = new QVBoxLayout();
+  mainLayout->setObjectName("CollapsibleInspector mainLayout");
   mainLayout->setContentsMargins(0,0,0,0);
   mainLayout->setSpacing(0);
   setLayout(mainLayout);
@@ -95,6 +96,7 @@ void CollapsibleInspectorHeader::createLayout()
   setCheckable(true);
 
   auto mainHLayout = new QHBoxLayout();
+  mainHLayout->setObjectName("CollapsibleInspectorHeader mainHLayout");
   mainHLayout->setContentsMargins(10,0,10,0);
   mainHLayout->setSpacing(7);
   setLayout(mainHLayout);

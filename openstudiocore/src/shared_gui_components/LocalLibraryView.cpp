@@ -52,6 +52,7 @@ LocalLibraryView::LocalLibraryView(QWidget * parent)
   : QWidget(parent)
 {
   auto mainVLayout = new QVBoxLayout();
+  mainVLayout->setObjectName("LocalLibraryView mainVLayout");
   mainVLayout->setSpacing(0);
   mainVLayout->setContentsMargins(0,0,0,0);
   setLayout(mainVLayout);
@@ -75,11 +76,13 @@ LocalLibraryView::LocalLibraryView(QWidget * parent)
   mainVLayout->addWidget(footer);
 
   auto footerVLayout = new QVBoxLayout();
+  footerVLayout->setObjectName("LocalLibraryView footerVLayout");
   footerVLayout->setContentsMargins(5,5,5,5);
   footerVLayout->setSpacing(5);
   footer->setLayout(footerVLayout);
 
   auto footerHLayout = new QHBoxLayout();
+  footerHLayout->setObjectName("LocalLibraryView footerHLayout");
   footerHLayout->setContentsMargins(0,0,0,0);
   footerHLayout->setSpacing(5);
   footerVLayout->addLayout(footerHLayout);
@@ -100,6 +103,7 @@ LocalLibraryView::LocalLibraryView(QWidget * parent)
   footerHLayout->addWidget(myMeasuresFolderButton);
 
   auto footerHLayout2 = new QHBoxLayout();
+  footerHLayout2->setObjectName("LocalLibraryView footerHLayout2");
   footerHLayout2->setContentsMargins(10,0,10,0);
   footerHLayout2->setSpacing(5);
   footerVLayout->addLayout(footerHLayout2);
@@ -152,6 +156,7 @@ LibraryItemView::LibraryItemView(QWidget * parent)
   setHasEmphasis(false);
 
   auto mainHBoxLayout = new QHBoxLayout();
+  mainHBoxLayout->setObjectName("LibraryItemView mainHBoxLayout");
   mainHBoxLayout->setContentsMargins(5,0,5,0);
 
   setLayout(mainHBoxLayout);

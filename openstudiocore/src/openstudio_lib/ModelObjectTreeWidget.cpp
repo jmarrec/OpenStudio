@@ -49,6 +49,7 @@ ModelObjectTreeWidget::ModelObjectTreeWidget(const model::Model& model, QWidget*
   : OSItemSelector(parent), m_model(model)
 {
   m_vLayout = new QVBoxLayout();
+  m_vLayout->setObjectName("ModelObjectTreeWidget m_vLayout");
   m_vLayout->setContentsMargins(0,7,0,0);
   m_vLayout->setSpacing(7);
   setLayout(m_vLayout);

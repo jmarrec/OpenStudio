@@ -153,7 +153,7 @@ InspectorView::InspectorView(QWidget* parent)
     m_currentView(nullptr)
 {
   m_vLayout = new QVBoxLayout();
-
+  m_vLayout->setObjectName("InspectorView m_vLayout");
   m_vLayout->setContentsMargins(0,0,0,0);
 
   m_vLayout->setSpacing(0);
@@ -789,6 +789,7 @@ void InspectorView:: toggleUnits(bool displayIP)
 BaseInspectorView::BaseInspectorView(QWidget * parent)
 {
   m_vLayout = new QVBoxLayout();
+  m_vLayout->setObjectName("BaseInspectorView m_vLayout");
 
   setLayout(m_vLayout);
 
@@ -890,6 +891,7 @@ NewPlenumDialog::NewPlenumDialog(QWidget * parent)
   : QDialog(parent)
 {
   auto mainVLayout = new QVBoxLayout();
+  mainVLayout->setObjectName("NewPlenumDialog mainVLayout");
   mainVLayout->setAlignment(Qt::AlignTop);
   mainVLayout->setContentsMargins(10,10,10,10);
   mainVLayout->setSpacing(10);
@@ -947,6 +949,7 @@ void NewPlenumDialog::onApplyClicked()
 PlenumChooserView::PlenumChooserView(QWidget * parent)
 {
   auto mainVLayout = new QVBoxLayout();
+  mainVLayout->setObjectName("PlenumChooserView mainVLayout");
   mainVLayout->setAlignment(Qt::AlignTop);
   setLayout(mainVLayout);
   mainVLayout->setContentsMargins(0,0,0,0);
@@ -955,6 +958,7 @@ PlenumChooserView::PlenumChooserView(QWidget * parent)
   auto supplyFrame = new QFrame();
   supplyFrame->setObjectName("IGRow");
   auto supplyVLayout = new QVBoxLayout();
+  supplyVLayout->setObjectName("PlenumChooserView supplyVLayout");
   supplyFrame->setLayout(supplyVLayout);
   mainVLayout->addWidget(supplyFrame);
 
@@ -975,6 +979,7 @@ PlenumChooserView::PlenumChooserView(QWidget * parent)
   auto returnFrame = new QFrame();
   returnFrame->setObjectName("IGRow");
   auto returnVLayout = new QVBoxLayout();
+  returnVLayout->setObjectName("PlenumChooserView returnVLayout");
   returnFrame->setLayout(returnVLayout);
   mainVLayout->addWidget(returnFrame);
 
@@ -1037,6 +1042,7 @@ void RefrigerationWalkinInspectorView::layoutModelObject( model::ModelObject & m
     delete t_layout;
   }
   auto zoneBoundaryLayout = new QVBoxLayout();
+  zoneBoundaryLayout->setObjectName("RefrigerationWalkinInspectorView zoneBoundaryLayout");
   zoneBoundaryLayout->setContentsMargins(0,0,0,0);
   zoneBoundaryLayout->setSpacing(0);
   m_zoneBoundaryWidget->setLayout(zoneBoundaryLayout);
@@ -2879,6 +2885,7 @@ void ScheduleRulesetInspectorView::layoutModelObject(model::ModelObject & modelO
   auto widget = new QWidget();
 
   auto mainLayout = new QVBoxLayout();
+  mainLayout->setObjectName("ScheduleRulesetInspectorView mainLayout");
   mainLayout->setAlignment(Qt::AlignTop);
   mainLayout->setContentsMargins(0, 0, 0, 0);
   mainLayout->setSpacing(0);
@@ -2890,6 +2897,7 @@ void ScheduleRulesetInspectorView::layoutModelObject(model::ModelObject & modelO
   mainLayout->addWidget(label, 0, Qt::AlignTop);
 
   auto layout = new QVBoxLayout();
+  layout->setObjectName("ScheduleRulesetInspectorView layout Name");
   layout->setAlignment(Qt::AlignTop);
   layout->setContentsMargins(10, 10, 10, 10);
   layout->setSpacing(6);
@@ -2913,6 +2921,7 @@ void ScheduleRulesetInspectorView::layoutModelObject(model::ModelObject & modelO
   mainLayout->addWidget(line);
 
   layout = new QVBoxLayout();
+  layout->setObjectName("ScheduleRulesetInspectorView layout Comment");
   layout->setAlignment(Qt::AlignTop);
   layout->setContentsMargins(10, 10, 10, 10);
   layout->setSpacing(6);

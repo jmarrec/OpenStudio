@@ -69,6 +69,7 @@ void CollapsibleComponentList::createLayout()
   this->setObjectName("GrayWidget");
 
   auto outerVLayout = new QVBoxLayout();
+  outerVLayout->setObjectName("CollapsibleComponentList outerVLayout");
   outerVLayout->setContentsMargins(0,0,0,0);
   this->setLayout(outerVLayout);
 
@@ -77,6 +78,7 @@ void CollapsibleComponentList::createLayout()
   outerVLayout->addWidget(outerWidget);
 
   m_mainLayout = new QVBoxLayout();
+  m_mainLayout->setObjectName("CollapsibleComponentList m_mainLayout");
   outerWidget->setLayout(m_mainLayout);
   m_mainLayout->setContentsMargins(0,0,0,0);
   m_mainLayout->setSpacing(0);

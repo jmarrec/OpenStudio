@@ -68,9 +68,10 @@ OSDialog::OSDialog(bool isIP,
 void OSDialog::createLayout()
 {
   m_upperLayout = new QVBoxLayout();
+  m_upperLayout->setObjectName("OSDialog m_upperLayout");
 
   auto lowerLayout = new QHBoxLayout();
-
+  lowerLayout->setObjectName("OSDialog lowerLayout");
   lowerLayout->addStretch();
 
   m_backButton = new QPushButton("Back",this);
@@ -91,6 +92,7 @@ void OSDialog::createLayout()
   lowerLayout->addWidget(m_cancelButton);
 
   auto mainLayout = new QVBoxLayout();
+  mainLayout->setObjectName("OSDialog mainLayout");
   mainLayout->setContentsMargins(m_layoutContentsMargins);
   mainLayout->addLayout(m_upperLayout);
   mainLayout->addLayout(lowerLayout);

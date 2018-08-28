@@ -42,12 +42,15 @@ OSViewSwitcher::OSViewSwitcher(QWidget * parent)
   : QWidget(parent),
     m_view(nullptr)
 {
-  // This is weird. A QWidget with a QVBoxLayout that has a QStackedWidget (which is a convenience Widget that exposes a QStackedLayout)
+  // OSViewSwitcher is a QWidget with a QVBoxLayout that has a QStackedWidget (which is a convenience Widget that exposes a QStackedLayout)
   auto layout = new QVBoxLayout();
+  layout->setObjectName("OSViewSwitcher QVBoxLayout");
   layout->setContentsMargins(0,0,0,0);
   setLayout(layout);
 
   m_stack = new QStackedWidget();
+  m_stack->setObjectName("OSViewSwitcher QStackedWidget");
+  m_stack->layout()->setObjectName("OSViewSwitcher QStackedWidget child layout");
 
   layout->addWidget(m_stack);
 }

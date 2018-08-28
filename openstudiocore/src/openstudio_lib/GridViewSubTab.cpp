@@ -54,12 +54,14 @@ namespace openstudio {
 
     // ***** Main Layout *****
     auto mainLayout = new QVBoxLayout();
+    mainLayout->setObjectName("GridViewSubTab mainLayout");
     mainLayout->setContentsMargins(0, 0, 0, 0);
     mainLayout->setSpacing(0);
     setLayout(mainLayout);
 
     // ***** Scroll *****
     m_scrollLayout = new QVBoxLayout();
+    m_scrollLayout->setObjectName("GridViewSubTab m_scrollLayout");
     m_scrollLayout->setContentsMargins(0, 0, 0, 0);
     m_scrollLayout->setSpacing(0);
 

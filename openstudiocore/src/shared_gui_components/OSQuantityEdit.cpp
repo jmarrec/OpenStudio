@@ -73,6 +73,7 @@ OSQuantityEdit2::OSQuantityEdit2(const std::string& modelUnits, const std::strin
   setEnabled(false);
 
   auto hLayout = new QHBoxLayout();
+  hLayout->setObjectName("OSQuantityEdit2 hLayout");
   setLayout(hLayout);
   hLayout->setContentsMargins(0,0,0,0);
   hLayout->addWidget(m_lineEdit);

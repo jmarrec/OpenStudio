@@ -62,6 +62,7 @@ PageNavigator::~PageNavigator()
 void PageNavigator::createLayout()
 {
   auto layout = new QHBoxLayout();
+  layout->setObjectName("PageNavigator::createLayout layout");
   layout->setContentsMargins(0,0,0,0);
   layout->setSpacing(2);
 
@@ -90,6 +91,7 @@ void PageNavigator::createLayout()
 
   ///! buttons for pages listed
   m_buttonLayout = new QHBoxLayout();
+  m_buttonLayout->setObjectName("PageNavigator::createLayout m_buttonLayout");
   m_buttonLayout->setContentsMargins(0,0,0,0);
   m_buttonLayout->setSpacing(2);
   layout->addLayout(m_buttonLayout);

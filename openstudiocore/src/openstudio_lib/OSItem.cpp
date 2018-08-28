@@ -194,11 +194,13 @@ OSItem* OSItem::makeItem(const OSItemId& itemId, OSItemType osItemType)
 void OSItem::createLayout()
 {
   auto mainHLayout = new QHBoxLayout();
+  mainHLayout->setObjectName("OSItem mainHLayout");
   mainHLayout->setContentsMargins(10,5,10,5);
   mainHLayout->setAlignment(Qt::AlignVCenter);
   setLayout(mainHLayout);
 
   auto leftVBoxLayout = new QVBoxLayout();
+  leftVBoxLayout->setObjectName("OSItem leftVBoxLayout");
 
   m_imageLeftLbl = new QLabel(this);
   leftVBoxLayout->addWidget(m_imageLeftLbl);

@@ -48,6 +48,7 @@ OSListView::OSListView(bool scrollable, QWidget * parent)
 {
   m_delegate = QSharedPointer<OSItemDelegate>(new OSItemDelegate());
   m_mainVLayout = new QVBoxLayout();
+  m_mainVLayout->setObjectName("OSListView m_mainVLayout");
   m_mainVLayout->setSizeConstraint(QLayout::SetMinimumSize);
   m_mainVLayout->setAlignment(Qt::AlignTop);
 
@@ -65,6 +66,7 @@ OSListView::OSListView(bool scrollable, QWidget * parent)
     m_scrollArea->setBackgroundRole(QPalette::NoRole);
 
     auto scrollLayout = new QVBoxLayout();
+    scrollLayout->setObjectName("OSListView scrollLayout");
     scrollLayout->setContentsMargins(0,0,0,0);
     scrollLayout->addWidget(m_scrollArea);
 

@@ -57,6 +57,7 @@ namespace openstudio {
     : QWidget(parent)
   {
     auto layout = new QVBoxLayout();
+    layout->setObjectName("RenderingColorWidget2 layout");
     layout->setContentsMargins(0, 0, 0, 0);
     this->setLayout(layout);
 
@@ -276,6 +277,7 @@ RenderingColorWidget::RenderingColorWidget(QWidget * parent )
   this->setObjectName("GrayWidget");
 
   auto hLayout = new QHBoxLayout();
+  hLayout->setObjectName("RenderingColorWidget hLayout");
   hLayout->setContentsMargins(0,0,0,0);
   hLayout->setSpacing(10);
   this->setLayout(hLayout);

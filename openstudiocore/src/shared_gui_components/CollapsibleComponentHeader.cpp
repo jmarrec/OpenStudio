@@ -64,6 +64,7 @@ void CollapsibleComponentHeader::createLayout(const std::string& text, int numRe
   setCheckable(true);
 
   auto mainHLayout = new QHBoxLayout();
+  mainHLayout->setObjectName("CollapsibleComponentHeader mainHLayout");
   setLayout(mainHLayout);
 
   // Arrow

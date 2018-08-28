@@ -62,6 +62,7 @@ OSInspectorView::OSInspectorView(bool addScrollArea, QWidget * parent)
   this->setObjectName("GrayWidget");
 
   auto outerVLayout = new QVBoxLayout();
+  outerVLayout->setObjectName("OSInspectorView outerVLayout");
   outerVLayout->setContentsMargins(0,0,0,0);
   this->setLayout(outerVLayout);
 

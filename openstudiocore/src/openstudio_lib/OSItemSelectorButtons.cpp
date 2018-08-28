@@ -67,6 +67,7 @@ OSItemSelectorButtons::OSItemSelectorButtons(QWidget * parent)
   this->setStyleSheet("QWidget#OSItemSelectorButtons { background: #E6E6E6; border-top: 1px solid black; }");
 
   m_vLayout = new QVBoxLayout();
+  m_vLayout->setObjectName("OSItemSelectorButtons m_vLayout");
   m_vLayout->setContentsMargins(0,0,0,0);
   m_vLayout->setSpacing(0);
   this->setLayout(m_vLayout);
@@ -74,6 +75,7 @@ OSItemSelectorButtons::OSItemSelectorButtons(QWidget * parent)
   // drop zone
 
   m_dropZoneLayout = new QHBoxLayout();
+  m_dropZoneLayout->setObjectName("OSItemSelectorButtons m_dropZoneLayout");
   m_dropZoneController = new AlwaysEmptyDropZoneVectorController();
   m_dropZone = new OSDropZone(m_dropZoneController);
   m_dropZone->setMaxItems(1);
@@ -90,6 +92,7 @@ OSItemSelectorButtons::OSItemSelectorButtons(QWidget * parent)
   m_vLayout->addWidget(buttonBox);
 
   auto buttonLayout = new QHBoxLayout();
+  buttonLayout->setObjectName("OSItemSelectorButtons buttonLayout");
   buttonLayout->setContentsMargins(10,10,10,10);
   buttonLayout->setSpacing(5);
   buttonBox->setLayout(buttonLayout);

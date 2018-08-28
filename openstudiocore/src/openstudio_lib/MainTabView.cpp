@@ -68,6 +68,7 @@ MainTabView::MainTabView(const QString & tabLabel, TabType tabType, QWidget * pa
   m_editView->setView(label);
 
   m_innerLayout = new QVBoxLayout();
+  m_innerLayout->setObjectName("MainTabView m_innerLayout");
   m_innerLayout->setSpacing(0);
   m_innerLayout->addWidget(m_editView);
 

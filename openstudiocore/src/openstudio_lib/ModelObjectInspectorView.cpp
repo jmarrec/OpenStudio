@@ -133,6 +133,7 @@ DefaultInspectorView::DefaultInspectorView(const model::Model& model,
   this->stackedWidget()->setCurrentIndex(0);
 
   auto mainVLayout = new QVBoxLayout();
+  mainVLayout->setObjectName("DefaultInspectorView mainVLayout");
   mainVLayout->setContentsMargins(7,7,7,7);
   mainVLayout->setSpacing(7);
 

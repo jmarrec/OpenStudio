@@ -109,6 +109,7 @@ OSDropZone::OSDropZone(OSVectorController* vectorController,
   }
 
   mainLayout->setContentsMargins(10,10,10,10);
+  mainLayout->setObjectName("OSDropZone mainLayout");
   setLayout(mainLayout);
 
   mainLayout->addWidget(m_scrollArea);
@@ -405,6 +406,7 @@ OSItemDropZone::OSItemDropZone(bool growsHorizontally,
     mainLayout = new QVBoxLayout();
   }
   mainLayout->setContentsMargins(10,10,10,10);
+  mainLayout->setObjectName("OSItemDropZone mainLayout");
   setLayout(mainLayout);
 
   auto label = new QLabel();
@@ -585,6 +587,7 @@ OSDropZone2::OSDropZone2()
   setStyleSheet(style);
 
   auto layout = new QVBoxLayout();
+  layout->setObjectName("OSDropZone2 layout");
   layout->setContentsMargins(5,5,5,5);
   setLayout(layout);
 

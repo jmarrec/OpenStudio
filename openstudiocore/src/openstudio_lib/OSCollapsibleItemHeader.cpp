@@ -52,6 +52,7 @@ OSCollapsibleItemHeader::OSCollapsibleItemHeader(const std::string & text,
   setObjectName("OSCollapsibleItemHeader");
 
   auto mainHLayout = new QHBoxLayout();
+  mainHLayout->setObjectName("OSCollapsibleItemHeader mainHLayout");
   mainHLayout->setContentsMargins(9, 0, 9, 0);
   setLayout(mainHLayout);
 

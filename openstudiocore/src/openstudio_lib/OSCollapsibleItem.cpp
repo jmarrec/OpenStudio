@@ -67,6 +67,7 @@ OSCollapsibleItem::OSCollapsibleItem(OSCollapsibleItemHeader * collapsibleItemHe
   setObjectName("OSCollapsibleItem");
 
   m_mainLayout = new QVBoxLayout();
+  m_mainLayout->setObjectName("OSCollapsibleItem m_mainLayout");
   m_mainLayout->setSpacing(0);
   m_mainLayout->setContentsMargins(0,0,0,0);
   setLayout(m_mainLayout);
@@ -101,6 +102,7 @@ OSCollapsibleItem::OSCollapsibleItem(OSCollapsibleItemHeader * collapsibleItemHe
   m_filterBtnGroup->addButton(m_filtersOffBtn);
 
   auto radioBtnVLayout = new QVBoxLayout();
+  radioBtnVLayout->setObjectName("OSCollapsibleItem radioBtnVLayout");
   radioBtnVLayout->addWidget(m_filtersOnBtn);
   radioBtnVLayout->addWidget(m_filtersOffBtn);
 
@@ -113,6 +115,7 @@ OSCollapsibleItem::OSCollapsibleItem(OSCollapsibleItemHeader * collapsibleItemHe
   connect(m_openLibDlgButton, &QPushButton::clicked, this, &OSCollapsibleItem::openLibDlgClicked);
 
   auto btnHLayout = new QHBoxLayout();
+  btnHLayout->setObjectName("OSCollapsibleItem btnHLayout");
   btnHLayout->addLayout(radioBtnVLayout);
   btnHLayout->addWidget(m_openLibDlgButton);
 
@@ -128,6 +131,7 @@ OSCollapsibleItem::OSCollapsibleItem(OSCollapsibleItemHeader * collapsibleItemHe
   connect(m_sortComboBox, static_cast<void (QComboBox::*)(const QString &)>(&QComboBox::currentIndexChanged), this, &OSCollapsibleItem::comboBoxClicked);
 
   auto vLayout = new QVBoxLayout();
+  vLayout->setObjectName("OSCollapsibleItem vLayout");
   vLayout->addLayout(btnHLayout);
   vLayout->addWidget(m_sortLabel);
   vLayout->addWidget(m_sortComboBox);

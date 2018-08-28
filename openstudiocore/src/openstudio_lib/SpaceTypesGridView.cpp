@@ -162,6 +162,8 @@ namespace openstudio {
     m_isIP(isIP)
   {
     auto mainLayout = new QVBoxLayout();
+    mainLayout->setObjectName("SpaceTypesGridView mainLayout");
+
     mainLayout->setSpacing(0);
     mainLayout->setContentsMargins(0, 0, 0, 0);
     setLayout(mainLayout);
@@ -181,6 +183,7 @@ namespace openstudio {
     bool isConnected = false;
 
     auto filterGridLayout = new QGridLayout();
+    filterGridLayout->setObjectName("SpaceTypesGridView filterGridLayout");
     filterGridLayout->setContentsMargins(7, 4, 0, 8);
     filterGridLayout->setSpacing(5);
 
@@ -190,6 +193,8 @@ namespace openstudio {
     filterGridLayout->addWidget(label, filterGridLayout->rowCount(), 0, Qt::AlignTop | Qt::AlignLeft);
 
     layout = new QVBoxLayout();
+    layout->setObjectName("SpaceTypesGridView layout (inside Filter)");
+
 
     m_filterLabel = new QLabel();
     m_filterLabel->setText("Load Type");

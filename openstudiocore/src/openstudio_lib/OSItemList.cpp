@@ -70,6 +70,7 @@ OSItemList::OSItemList(OSVectorController* vectorController,
   setStyleSheet(style);
 
   auto outerVLayout = new QVBoxLayout();
+  outerVLayout->setObjectName("OSItemList outerVLayout");
   outerVLayout->setContentsMargins(0,0,0,0);
   this->setLayout(outerVLayout);
 
@@ -88,6 +89,7 @@ OSItemList::OSItemList(OSVectorController* vectorController,
   }
 
   m_vLayout = new QVBoxLayout();
+  m_vLayout->setObjectName("OSItemList m_vLayout");
   outerWidget->setLayout(m_vLayout);
   m_vLayout->setContentsMargins(0,0,0,0);
   m_vLayout->setSpacing(0);

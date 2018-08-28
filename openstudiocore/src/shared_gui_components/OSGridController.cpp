@@ -1297,6 +1297,7 @@ namespace openstudio {
     OS_ASSERT(static_cast<int>(m_baseConcepts.size()) > column);
 
     auto layout = new QGridLayout(this->gridView());
+    layout->setObjectName("OSGridController::widgetAt layout");
     const int widgetHeight = 30;
     int numWidgets = 0;
 
@@ -1332,6 +1333,8 @@ namespace openstudio {
       auto holder = new Holder(this->gridView());
       holder->setMinimumHeight(widgetHeight);
       auto l = new QVBoxLayout(this->gridView());
+      l->setObjectName("OSGridController::widgetAt l");
+
       l->setAlignment(Qt::AlignCenter);
       l->setSpacing(0);
       l->setContentsMargins(0, 0, 0, 0);
@@ -1989,6 +1992,8 @@ HorizontalHeaderWidget::HorizontalHeaderWidget(const QString & fieldName, QWidge
   m_pushButton(new HorizontalHeaderPushButton(this))
 {
   auto mainLayout = new QVBoxLayout(this);
+  mainLayout->setObjectName("HorizontalHeaderWidget mainLayout");
+
   mainLayout->setContentsMargins(0,0,0,5);
   mainLayout->setAlignment(Qt::AlignCenter);
   setLayout(mainLayout);
@@ -2039,6 +2044,7 @@ void HorizontalHeaderWidget::addWidget(const QSharedPointer<QWidget> &t_widget)
   if (!t_widget.isNull()) {
     m_addedWidgets.push_back(t_widget);
     auto hLayout = new QHBoxLayout();
+    hLayout->setObjectName("HorizontalHeaderWidget:addWidget hLayout");
     hLayout->setContentsMargins(5,0,5,0);
     qobject_cast<QVBoxLayout *>(layout())->addLayout(hLayout);
     hLayout->addWidget(t_widget.data());

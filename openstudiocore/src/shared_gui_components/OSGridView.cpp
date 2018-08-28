@@ -70,6 +70,7 @@ namespace openstudio {
 QGridLayout *OSGridView::makeGridLayout()
 {
   auto gridLayout = new QGridLayout();
+  gridLayout->setObjectName("OSGridView gridLayout");
   gridLayout->setSpacing(0);
   gridLayout->setContentsMargins(0,0,0,0);
   //gridLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
@@ -100,6 +101,7 @@ OSGridView::OSGridView(OSGridController * gridController,
   connect(buttonGroup, static_cast<void (QButtonGroup::*)(int)>(&QButtonGroup::buttonClicked), this, &OSGridView::selectCategory);
 
   auto buttonLayout = new QHBoxLayout();
+  buttonLayout->setObjectName("OSGridView buttonLayout");
   buttonLayout->setSpacing(3);
   buttonLayout->setContentsMargins(10,10,10,10);
   buttonLayout->setAlignment(Qt::AlignCenter | Qt::AlignLeft);
@@ -127,6 +129,8 @@ OSGridView::OSGridView(OSGridController * gridController,
    * * Then the model-dependent data, such as Space Type Name, All, Rendering Color, Default Construction set, etc
    */
   auto layout = new QVBoxLayout();
+  layout->setObjectName("OSGridView layout");
+
   layout->setSpacing(0);
   layout->setContentsMargins(0,0,0,0);
   setLayout(layout);
@@ -151,6 +155,7 @@ OSGridView::OSGridView(OSGridController * gridController,
   // Create a QLayout object with a parent of widget: This will set widget's layout to this QVBoxLayout already.
   // widget has a layout that is a QVBoxLayout
   m_contentLayout = new QVBoxLayout(widget);
+  m_contentLayout->setObjectName("OSGridView m_contentLayout");
   m_contentLayout->setAlignment(Qt::AlignTop | Qt::AlignLeft);
   m_contentLayout->setSpacing(0);
   m_contentLayout->setContentsMargins(0,0,0,0);

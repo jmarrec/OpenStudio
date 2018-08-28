@@ -57,6 +57,7 @@ CollapsibleComponent::CollapsibleComponent(CollapsibleComponentHeader * collapsi
   setObjectName("CollapsibleComponent");
 
   m_mainLayout = new QVBoxLayout();
+  m_mainLayout->setObjectName("CollapsibleComponent m_mainLayout");
   m_mainLayout->setSpacing(0);
   m_mainLayout->setContentsMargins(0,0,0,0);
   setLayout(m_mainLayout);

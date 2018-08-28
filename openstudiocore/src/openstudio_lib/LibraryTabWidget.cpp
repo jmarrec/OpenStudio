@@ -44,7 +44,7 @@ LibraryTabWidget::LibraryTabWidget(QWidget * parent)
   : QWidget(parent)
 {
   auto mainLayout = new QVBoxLayout();
-
+  mainLayout->setObjectName("LibraryTabWidget mainLayout");
   mainLayout->setSpacing(0);
 
   mainLayout->setContentsMargins(0,0,0,0);
@@ -79,6 +79,7 @@ LibraryTabWidget::LibraryTabWidget(QWidget * parent)
   OS_ASSERT(isConnected);
 
   auto hLayout = new QHBoxLayout();
+  hLayout->setObjectName("LibraryTabWidget hLayout");
   hLayout->setContentsMargins(0, 0, 0, 0);
   hLayout->addStretch();
   hLayout->addWidget(m_removeButton, 0, Qt::AlignVCenter);
