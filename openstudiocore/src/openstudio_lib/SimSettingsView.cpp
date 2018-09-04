@@ -1568,100 +1568,52 @@ void SimSettingsView::attachZoneAirContaminantBalance()
     boost::optional<BasicQuery>(std::bind(&model::ZoneAirContaminantBalance::isCarbonDioxideConcentrationDefaulted, mo))
   );
 
-  // m_outdoorCarbonDioxideScheduleName->bind(mo,"outdoorCarbonDioxideScheduleName");
-  // outdoorCarbonDioxideScheduleName does not exist in ZoneAirContaminantBalance
 
-/*
- *
- *  template<typename ChoiceType>
- *  void bind(model::ModelObject& modelObject,
- *            std::function<std::string (ChoiceType)> toString,
- *            std::function<std::vector<ChoiceType> ()> choices,
- *            std::function<boost::optional<ChoiceType> ()> getter,
- *            std::function<bool (ChoiceType)> setter,
- *            boost::optional<NoFailAction> reset=boost::none)
- *  {
- */
+  std::function<std::string (model::Schedule)> toString = &openstudio::objectName;
+
+  std::function<boost::optional<model::Schedule> ()> getter = std::bind(&model::ZoneAirContaminantBalance::outdoorCarbonDioxideSchedule, &mo);
+
+  std::function<std::vector<model::Schedule> ()> choices = std::bind(&openstudio::sortByObjectName<model::Schedule>,
+                                                                     std::bind(&openstudio::model::getCompatibleSchedules,
+                                                                               m_model,
+                                                                               "ZoneAirContaminantBalance",
+                                                                               "Outdoor Carbon Dioxide"));
+
+  boost::optional<std::function<void ()> > reset = boost::optional<std::function<void ()> >(
+      std::bind(&model::ZoneAirContaminantBalance::resetOutdoorCarbonDioxideSchedule, &mo));
+
+  // toString, getter, choices and reset work fine. Problem is the setter
 
 
-  std::function<std::string(const boost::optional<model::Schedule> &)> toString =
-    [](boost::optional<model::Schedule> t_s) {
-      std::string result;
-      if(t_s) {
-        result = t_s->nameString();
-      }
-      return result;
-    };
 
-  std::function<boost::optional<model::Schedule>(model::ZoneAirContaminantBalance *)> getter =
-    [](model::ZoneAirContaminantBalance * z) {
-      return z->outdoorCarbonDioxideSchedule();
+    // For this bind call, I need to pass model::Schedule& while the template expects model::Schedule
+  std::function<bool (model::Schedule&)> setter = std::bind(&model::ZoneAirContaminantBalance::setOutdoorCarbonDioxideSchedule,
+                                                           &mo, std::placeholders::_1);
+
+  // This setter creates a SEGFAULT
+  std::function<bool (model::Schedule)> fakesetter = [&mo](model::Schedule s) {
+    return mo.setOutdoorCarbonDioxideSchedule(s);
   };
 
+  /*
+   *template<typename model::Schedule>
+   *void bind(model::ModelObject& modelObject,
+   *          std::function<std::string (model::Schedule)> toString,
+   *          std::function<std::vector<model::Schedule> ()> choices,
+   *          std::function<boost::optional<model::Schedule> ()> getter,
+   *          std::function<bool (model::Schedule)> setter,
+   *          boost::optional<NoFailAction> reset=boost::none)
+   */
 
 
-/*
- *  std::function<std::vector<boost::optional<model::Schedule>>(const model::ZoneAirContaminantBalance &)> choices(
- *          [](const model::ZoneAirContaminantBalance &z) {
- *          std::vector<boost::optional<model::Schedule>> retval;
- *
- *          for (auto &s : z.model().getModelObjects<model::Schedule>()) {
- *            retval.push_back(boost::optional<model::Schedule>(s));
- *          }
- *
- *          return retval;
- *        }
- *        );
- */
-  std::function<std::vector<boost::optional<model::Schedule>>(model::ZoneAirContaminantBalance *)> choices =
-          [](model::ZoneAirContaminantBalance *z){
-          std::vector<boost::optional<model::Schedule>> retval;
-
-          for (auto &s : z.model().getModelObjects<model::Schedule>()) {
-            retval.push_back(boost::optional<model::Schedule>(s));
-          }
-
-          return retval;
-        };
-
-  std::function<bool(model::ZoneAirContaminantBalance *, const boost::optional<model::Schedule> &)> setter =
-    [](model::ZoneAirContaminantBalance * z, boost::optional<model::Schedule> t_s)
-    {
-      bool success = false;
-      if( t_s ) {
-        success = z->setOutdoorCarbonDioxideSchedule(*t_s);
-      }
-      return success;
-    };
-
-  boost::optional<std::function<void(model::ZoneAirContaminantBalance *)> > reset (
-          [](model::ZoneAirContaminantBalance * z) {
-            z->resetOutdoorCarbonDioxideSchedule();
-        });
-
-  m_outdoorCarbonDioxideScheduleName->bind<boost::optional<model::Schedule>>(
+  m_outdoorCarbonDioxideScheduleName->bind<model::Schedule>(
     mo,
     toString, // toString
     choices, // choices, // choices
     getter, // getter
-    setter, // setter
+    fakesetter, // setter
     reset // resetter
   );
-
-  /*
-   *m_outdoorCarbonDioxideScheduleName->bind<boost::optional<model::Schedule>>(
-   *  mo,
-   *  &openstudio::objectName, // toString
-   *  std::function<std::vector<model::Schedule> ()>(std::bind(&openstudio::sortByObjectName<model::Schedule>,
-   *              std::bind(&openstudio::model::getCompatibleSchedules,
-   *                          m_model,
-   *                          "ZoneAirContaminantBalance",
-   *                          "Outdoor Carbon Dioxide"))), // choices
-   *  NullAdapter(&model::ZoneAirContaminantBalance::outdoorCarbonDioxideSchedule), // getter
-   *  NullAdapter(&model::ZoneAirContaminantBalance::setOutdoorCarbonDioxideSchedule), // setter
-   *  NullAdapter(&model::ZoneAirContaminantBalance::resetOutdoorCarbonDioxideSchedule) // resetter
-   *);
-   */
 
 }
 
