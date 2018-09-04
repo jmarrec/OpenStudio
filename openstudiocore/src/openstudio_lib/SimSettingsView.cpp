@@ -1557,21 +1557,21 @@ void SimSettingsView::attachZoneAirHeatBalanceAlgorithm()
 
 void SimSettingsView::attachZoneAirContaminantBalance()
 {
-  model::ZoneAirContaminantBalance mo = m_model.getUniqueModelObject<model::ZoneAirContaminantBalance>();
+  m_zoneAirContaminantBalance = m_model.getUniqueModelObject<model::ZoneAirContaminantBalance>();
 
   // m_carbonDioxideConcentration->bind(mo,"carbonDioxideConcentration");
   m_carbonDioxideConcentration->bind(
-    mo,
-    std::bind(&model::ZoneAirContaminantBalance::carbonDioxideConcentration, mo),
-    boost::optional<BoolSetter>(std::bind(&model::ZoneAirContaminantBalance::setCarbonDioxideConcentrationNoFail, mo, std::placeholders::_1)),
-    boost::optional<NoFailAction>(std::bind(&model::ZoneAirContaminantBalance::resetCarbonDioxideConcentration, mo)),
-    boost::optional<BasicQuery>(std::bind(&model::ZoneAirContaminantBalance::isCarbonDioxideConcentrationDefaulted, mo))
+    *m_zoneAirContaminantBalance,
+    std::bind(&model::ZoneAirContaminantBalance::carbonDioxideConcentration, m_zoneAirContaminantBalance.get_ptr()),
+    boost::optional<BoolSetter>(std::bind(&model::ZoneAirContaminantBalance::setCarbonDioxideConcentrationNoFail, m_zoneAirContaminantBalance.get_ptr(), std::placeholders::_1)),
+    boost::optional<NoFailAction>(std::bind(&model::ZoneAirContaminantBalance::resetCarbonDioxideConcentration, m_zoneAirContaminantBalance.get_ptr())),
+    boost::optional<BasicQuery>(std::bind(&model::ZoneAirContaminantBalance::isCarbonDioxideConcentrationDefaulted, m_zoneAirContaminantBalance.get_ptr()))
   );
 
 
   std::function<std::string (model::Schedule)> toString = &openstudio::objectName;
 
-  std::function<boost::optional<model::Schedule> ()> getter = std::bind(&model::ZoneAirContaminantBalance::outdoorCarbonDioxideSchedule, &mo);
+  std::function<boost::optional<model::Schedule> ()> getter = std::bind(&model::ZoneAirContaminantBalance::outdoorCarbonDioxideSchedule, m_zoneAirContaminantBalance.get_ptr());
 
   std::function<std::vector<model::Schedule> ()> choices = std::bind(&openstudio::sortByObjectName<model::Schedule>,
                                                                      std::bind(&openstudio::model::getCompatibleSchedules,
@@ -1580,7 +1580,7 @@ void SimSettingsView::attachZoneAirContaminantBalance()
                                                                                "Outdoor Carbon Dioxide"));
 
   boost::optional<std::function<void ()> > reset = boost::optional<std::function<void ()> >(
-      std::bind(&model::ZoneAirContaminantBalance::resetOutdoorCarbonDioxideSchedule, &mo));
+      std::bind(&model::ZoneAirContaminantBalance::resetOutdoorCarbonDioxideSchedule, m_zoneAirContaminantBalance.get_ptr()));
 
   // toString, getter, choices and reset work fine. Problem is the setter
 
@@ -1588,11 +1588,15 @@ void SimSettingsView::attachZoneAirContaminantBalance()
 
     // For this bind call, I need to pass model::Schedule& while the template expects model::Schedule
   std::function<bool (model::Schedule&)> setter = std::bind(&model::ZoneAirContaminantBalance::setOutdoorCarbonDioxideSchedule,
-                                                           &mo, std::placeholders::_1);
+                                                            m_zoneAirContaminantBalance.get_ptr(), std::placeholders::_1);
 
   // This setter creates a SEGFAULT
-  std::function<bool (model::Schedule)> fakesetter = [&mo](model::Schedule s) {
-    return mo.setOutdoorCarbonDioxideSchedule(s);
+  std::function<bool (model::Schedule)> setter2 = [this](model::Schedule s) {
+    if( m_zoneAirContaminantBalance ) {
+      return m_zoneAirContaminantBalance->setOutdoorCarbonDioxideSchedule(s);
+    } else {
+      return false;
+    }
   };
 
   /*
@@ -1607,11 +1611,11 @@ void SimSettingsView::attachZoneAirContaminantBalance()
 
 
   m_outdoorCarbonDioxideScheduleName->bind<model::Schedule>(
-    mo,
+    *m_zoneAirContaminantBalance,
     toString, // toString
     choices, // choices, // choices
     getter, // getter
-    fakesetter, // setter
+    setter2, // setter
     reset // resetter
   );
 

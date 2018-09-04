@@ -36,6 +36,7 @@
 #include "../model/Model.hpp"
 #include "../model/ShadowCalculation.hpp"
 #include "../model/SimulationControl.hpp"
+#include "../model/ZoneAirContaminantBalance.hpp"
 
 class QButtonGroup;
 class QCheckBox;
@@ -286,6 +287,7 @@ private:
   // HeatBalance
   //OSLineEdit2 * m_algorithmHeatBalance;
   OSComboBox2 * m_algorithmHeatBalance;
+  boost::optional<model::ZoneAirContaminantBalance> m_zoneAirContaminantBalance;
   OSQuantityEdit2 * m_surfaceTemperatureUpperLimit;
   OSQuantityEdit2 * m_minimumSurfaceConvectionHeatTransferCoefficientValue;
   OSQuantityEdit2 * m_maximumSurfaceConvectionHeatTransferCoefficientValue;
