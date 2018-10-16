@@ -29,7 +29,6 @@
 #include "WaterHeaterSizing.hpp"
 #include "WaterHeaterSizing_Impl.hpp"
 
-// TODO: Check the following class names against object getters and setters.
 #include "WaterToWaterComponent.hpp"
 #include "WaterToWaterComponent_Impl.hpp"
 
@@ -150,8 +149,14 @@ namespace detail {
     return getDouble(OS_WaterHeater_SizingFields::HeightAspectRatio,true);
   }
 
-  bool WaterHeaterSizing_Impl::setWaterHeater(const WaterHeater& waterHeater) {
-    bool result = setPointer(OS_WaterHeater_SizingFields::WaterHeaterName, waterHeater.handle());
+  bool WaterHeaterSizing_Impl::setWaterHeater(const WaterToWaterComponent& waterHeater) {
+    bool result = false;
+    if ( (waterHeater.iddObjectType() != IddObjectType::OS_WaterHeater_Mixed) &&
+         (waterHeater.iddObjectType() != IddObjectType::OS_WaterHeater_Stratified) ) {
+      LOG(Error, "WaterHeaterSizing only accepts WaterHeater:Mixed or WaterHeater:Stratified");
+    } else {
+      result = setPointer(OS_WaterHeater_SizingFields::WaterHeaterName, waterHeater.handle());
+    }
     return result;
   }
 
@@ -185,9 +190,9 @@ namespace detail {
     OS_ASSERT(result);
   }
 
-  void WaterHeaterSizing_Impl::setNominalTankVolumeforAutosizingPlantConnections(double nominalTankVolumeforAutosizingPlantConnections) {
+  bool WaterHeaterSizing_Impl::setNominalTankVolumeforAutosizingPlantConnections(double nominalTankVolumeforAutosizingPlantConnections) {
     bool result = setDouble(OS_WaterHeater_SizingFields::NominalTankVolumeforAutosizingPlantConnections, nominalTankVolumeforAutosizingPlantConnections);
-    OS_ASSERT(result);
+    return result;
   }
 
   void WaterHeaterSizing_Impl::resetNominalTankVolumeforAutosizingPlantConnections() {
@@ -255,9 +260,9 @@ namespace detail {
     OS_ASSERT(result);
   }
 
-  void WaterHeaterSizing_Impl::setNumberofUnits(double numberofUnits) {
+  bool WaterHeaterSizing_Impl::setNumberofUnits(double numberofUnits) {
     bool result = setDouble(OS_WaterHeater_SizingFields::NumberofUnits, numberofUnits);
-    OS_ASSERT(result);
+    return result;
   }
 
   void WaterHeaterSizing_Impl::resetNumberofUnits() {
@@ -316,14 +321,15 @@ WaterHeaterSizing::WaterHeaterSizing(const Model& model, const WaterToWaterCompo
 {
   OS_ASSERT(getImpl<detail::WaterHeaterSizing_Impl>());
 
-  if ( (waterHeater.iddObjectType() != OS_WaterHeater_Mixed) &&
-       (waterHeater.iddObjectType() != OS_WaterHeater_Stratified) ) {
+  if ( (waterHeater.iddObjectType() != IddObjectType::OS_WaterHeater_Mixed) &&
+       (waterHeater.iddObjectType() != IddObjectType::OS_WaterHeater_Stratified) ) {
     LOG_AND_THROW("WaterHeaterSizing only accepts WaterHeater:Mixed or WaterHeater:Stratified");
   }
 
-  bool ok = true;
-  ok = setWaterHeater(waterHeater);
+  bool ok = setWaterHeater(waterHeater);
   OS_ASSERT(ok);
+
+  setName(waterHeater.nameString() + " WH:Sizing");
 
   setDesignMode("PeakDraw");
   setTimeStorageCanMeetPeakDraw(0.538503);
@@ -433,8 +439,8 @@ void WaterHeaterSizing::resetTimeforTankRecovery() {
   getImpl<detail::WaterHeaterSizing_Impl>()->resetTimeforTankRecovery();
 }
 
-void WaterHeaterSizing::setNominalTankVolumeforAutosizingPlantConnections(double nominalTankVolumeforAutosizingPlantConnections) {
-  getImpl<detail::WaterHeaterSizing_Impl>()->setNominalTankVolumeforAutosizingPlantConnections(nominalTankVolumeforAutosizingPlantConnections);
+bool WaterHeaterSizing::setNominalTankVolumeforAutosizingPlantConnections(double nominalTankVolumeforAutosizingPlantConnections) {
+  return getImpl<detail::WaterHeaterSizing_Impl>()->setNominalTankVolumeforAutosizingPlantConnections(nominalTankVolumeforAutosizingPlantConnections);
 }
 
 void WaterHeaterSizing::resetNominalTankVolumeforAutosizingPlantConnections() {
@@ -489,8 +495,8 @@ void WaterHeaterSizing::resetRecoveryCapacityperFloorArea() {
   getImpl<detail::WaterHeaterSizing_Impl>()->resetRecoveryCapacityperFloorArea();
 }
 
-void WaterHeaterSizing::setNumberofUnits(double numberofUnits) {
-  getImpl<detail::WaterHeaterSizing_Impl>()->setNumberofUnits(numberofUnits);
+bool WaterHeaterSizing::setNumberofUnits(double numberofUnits) {
+  return getImpl<detail::WaterHeaterSizing_Impl>()->setNumberofUnits(numberofUnits);
 }
 
 void WaterHeaterSizing::resetNumberofUnits() {

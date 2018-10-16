@@ -116,7 +116,7 @@ class MODEL_API WaterHeaterSizing : public ModelObject {
 
   void resetTimeforTankRecovery();
 
-  void setNominalTankVolumeforAutosizingPlantConnections(double nominalTankVolumeforAutosizingPlantConnections);
+  bool setNominalTankVolumeforAutosizingPlantConnections(double nominalTankVolumeforAutosizingPlantConnections);
 
   void resetNominalTankVolumeforAutosizingPlantConnections();
 
@@ -144,7 +144,7 @@ class MODEL_API WaterHeaterSizing : public ModelObject {
 
   void resetRecoveryCapacityperFloorArea();
 
-  void setNumberofUnits(double numberofUnits);
+  bool setNumberofUnits(double numberofUnits);
 
   void resetNumberofUnits();
 

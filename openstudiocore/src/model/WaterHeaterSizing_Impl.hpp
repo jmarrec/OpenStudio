@@ -122,7 +122,7 @@ namespace detail {
     bool setTimeforTankRecovery(double timeforTankRecovery);
     void resetTimeforTankRecovery();
 
-    void setNominalTankVolumeforAutosizingPlantConnections(double nominalTankVolumeforAutosizingPlantConnections);
+    bool setNominalTankVolumeforAutosizingPlantConnections(double nominalTankVolumeforAutosizingPlantConnections);
     void resetNominalTankVolumeforAutosizingPlantConnections();
 
     bool setNumberofBedrooms(int numberofBedrooms);
@@ -143,7 +143,7 @@ namespace detail {
     bool setRecoveryCapacityperFloorArea(double recoveryCapacityperFloorArea);
     void resetRecoveryCapacityperFloorArea();
 
-    void setNumberofUnits(double numberofUnits);
+    bool setNumberofUnits(double numberofUnits);
     void resetNumberofUnits();
 
     bool setStorageCapacityperUnit(double storageCapacityperUnit);
