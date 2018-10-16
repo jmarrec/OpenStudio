@@ -1256,6 +1256,8 @@ WaterHeaterStratified::WaterHeaterStratified(const Model& model)
 {
   OS_ASSERT(getImpl<detail::WaterHeaterStratified_Impl>());
 
+  WaterHeaterSizing sz(model, *this);
+
   setTankVolume(0.1893); // autosizable
   setTankHeight(1.4); // autosizable
 
@@ -2001,4 +2003,4 @@ WaterHeaterStratified::WaterHeaterStratified(std::shared_ptr<detail::WaterHeater
   }
 
 } // model
-} // openstudio
+} // openstudio

@@ -1858,6 +1858,8 @@ WaterHeaterMixed::WaterHeaterMixed(const Model& model)
 {
   OS_ASSERT(getImpl<detail::WaterHeaterMixed_Impl>());
 
+  WaterHeaterSizing sz(model, *this);
+
   setTankVolume(0.3785);
   setDeadbandTemperatureDifference(2.0);
   setMaximumTemperatureLimit(82.22);
@@ -2652,4 +2654,4 @@ WaterHeaterMixed::WaterHeaterMixed(std::shared_ptr<detail::WaterHeaterMixed_Impl
   }
 
 } // model
-} // openstudio
+} // openstudio
