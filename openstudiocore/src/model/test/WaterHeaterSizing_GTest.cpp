@@ -49,32 +49,20 @@ TEST_F(ModelFixture,WaterHeaterSizing) {
   ASSERT_EXIT (
   {
      model::Model m;
-     model::WaterHeaterMixed wh(m);
-     model::WaterHeaterSizing sz(m, wh);
+     // The WaterHeaterMixed will instantiate a WaterHeaterSizing
+     WaterHeaterMixed wh(m);
+     WaterHeaterSizing sz = wh.waterHeaterSizing();
 
      exit(0);
   } ,
     ::testing::ExitedWithCode(0), "" );
 }
 
-TEST_F(ModelFixture,WaterHeaterSizing_BadCtor) {
-  ::testing::FLAGS_gtest_death_test_style = "threadsafe";
-
-  ASSERT_THROW (
-  {
-     model::Model m;
-     // Another WaterToWaterComponent, but inappropriate
-     model::HeatExchangerFluidToFluid hx(m);
-     model::WaterHeaterSizing sz(m, hx);
-
-  } , openstudio::Exception);
-}
-
 TEST_F(ModelFixture,WaterHeaterSizing_ConstructorDefaults) {
 
   model::Model m;
   model::WaterHeaterMixed wh(m);
-  model::WaterHeaterSizing sz(m, wh);
+  WaterHeaterSizing sz = wh.waterHeaterSizing();
 
   EXPECT_EQ("PeakDraw", sz.designMode());
 
@@ -105,14 +93,15 @@ TEST_F(ModelFixture,WaterHeaterSizing_GettersSetters) {
 
   model::Model m;
   model::WaterHeaterMixed wh(m);
-  model::WaterHeaterSizing sz(m, wh);
+  WaterHeaterSizing sz = wh.waterHeaterSizing();
 
   EXPECT_EQ(wh.handle(), sz.waterHeater().handle());
 
+  // Note setWaterHeater isn't public anymore
   // Another WaterToWaterComponent, but inappropriate
-  model::HeatExchangerFluidToFluid hx(m);
-  EXPECT_FALSE(sz.setWaterHeater(hx));
-  EXPECT_EQ(wh.handle(), sz.waterHeater().handle());
+  // model::HeatExchangerFluidToFluid hx(m);
+  // EXPECT_FALSE(sz.setWaterHeater(hx));
+  // EXPECT_EQ(wh.handle(), sz.waterHeater().handle());
 
 
   // Name
@@ -283,12 +272,24 @@ TEST_F(ModelFixture,WaterHeaterSizing_GettersSetters) {
   EXPECT_FALSE(sz.recoveryCapacityperFloorArea());
 
   /***************************************************************************
-  *                                 perUnit                                        *
+  *                                 PerUnit                                        *
   ***************************************************************************/
 
   /**
-   * Number of Units
+   * Number of Units (weirdly, a double)
    */
+  // Reset first, so that we don't depend on Ctor at all
+  sz.resetNumberofUnits();
+  EXPECT_FALSE(sz.numberofUnits());
+
+  // Set
+  EXPECT_TRUE(sz.setNumberofUnits(10.0));
+  ASSERT_TRUE(sz.numberofUnits());
+  EXPECT_DOUBLE_EQ(10.0, sz.numberofUnits().get());
+
+  // reset
+  sz.resetNumberofUnits();
+  EXPECT_FALSE(sz.numberofUnits());
 
   /**
    * Storage Capacity per Unit
@@ -350,9 +351,9 @@ TEST_F(ModelFixture,WaterHeaterSizing_GettersSetters) {
   EXPECT_FALSE(sz.heightAspectRatio());
 
   // Set
-  EXPECT_TRUE(sz.setHeightAspectRatio(1.0));
+  EXPECT_TRUE(sz.setHeightAspectRatio(3.0));
   ASSERT_TRUE(sz.heightAspectRatio());
-  EXPECT_DOUBLE_EQ(1.0, sz.heightAspectRatio().get());
+  EXPECT_DOUBLE_EQ(3.0, sz.heightAspectRatio().get());
 
   // reset
   sz.resetHeightAspectRatio();
