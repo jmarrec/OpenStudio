@@ -321,7 +321,7 @@ WaterHeaterSizing::WaterHeaterSizing(const Model& model, const WaterToWaterCompo
     LOG_AND_THROW("WaterHeaterSizing only accepts WaterHeater:Mixed or WaterHeater:Stratified");
   }
 
-  bool ok = setWaterHeater(waterHeater);
+  bool ok = getImpl<detail::WaterHeaterSizing_Impl>()->setWaterHeater(waterHeater);
   OS_ASSERT(ok);
 
   setName(waterHeater.nameString() + " WH:Sizing");
@@ -406,9 +406,11 @@ boost::optional<double> WaterHeaterSizing::heightAspectRatio() const {
   return getImpl<detail::WaterHeaterSizing_Impl>()->heightAspectRatio();
 }
 
-bool WaterHeaterSizing::setWaterHeater(const WaterToWaterComponent& waterHeater) {
-  return getImpl<detail::WaterHeaterSizing_Impl>()->setWaterHeater(waterHeater);
-}
+/*
+ *bool WaterHeaterSizing::setWaterHeater(const WaterToWaterComponent& waterHeater) {
+ *  return getImpl<detail::WaterHeaterSizing_Impl>()->setWaterHeater(waterHeater);
+ *}
+ */
 
 bool WaterHeaterSizing::setDesignMode(const std::string& designMode) {
   return getImpl<detail::WaterHeaterSizing_Impl>()->setDesignMode(designMode);

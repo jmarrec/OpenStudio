@@ -37,6 +37,9 @@ namespace openstudio {
 namespace model {
 
 class WaterToWaterComponent;
+// For friending
+class WaterHeaterMixed;
+class WaterHeaterStratified;
 
 namespace detail {
 
@@ -49,9 +52,6 @@ class MODEL_API WaterHeaterSizing : public ModelObject {
  public:
   /** @name Constructors and Destructors */
   //@{
-
-  /* This constructor only accepts WaterHeater:Mixed, or WaterHeater:Stratified */
-  explicit WaterHeaterSizing(const Model& model, const WaterToWaterComponent& waterHeater);
 
   virtual ~WaterHeaterSizing() {}
 
@@ -101,8 +101,9 @@ class MODEL_API WaterHeaterSizing : public ModelObject {
   /** @name Setters */
   //@{
 
-  // Asks for a WaterToWaterComponent, but can only be a WaterHeater:Mixed or WaterHeater:Stratified
-  bool setWaterHeater(const WaterToWaterComponent& waterHeater);
+
+  // TODO: Note: JM 2018-10-16 I've decided to not expose this one, see below for protected constructor as well
+  // bool setWaterHeater(const WaterToWaterComponent& waterHeater);
 
   bool setDesignMode(const std::string& designMode);
 
@@ -154,6 +155,15 @@ class MODEL_API WaterHeaterSizing : public ModelObject {
 
   //@}
  protected:
+
+  // TODO: Note JM 2018-10-16 I decided to make this constructor protected
+  // Only the Ctor from WaterHeaterMixed and WaterHeaterStratified should be allowed to instantiate this class
+  /* This constructor only accepts WaterHeater:Mixed, or WaterHeater:Stratified */
+  explicit WaterHeaterSizing(const Model& model, const WaterToWaterComponent& waterHeater);
+
+  friend class WaterHeaterMixed;
+  friend class WaterHeaterStratified;
+
   /// @cond
   typedef detail::WaterHeaterSizing_Impl ImplType;
 
