@@ -33,6 +33,8 @@
 #include "WaterHeaterHeatPump_Impl.hpp"
 #include "WaterHeaterHeatPumpWrappedCondenser.hpp"
 #include "WaterHeaterHeatPumpWrappedCondenser_Impl.hpp"
+#include "WaterHeaterSizing.hpp"
+#include "WaterHeaterSizing_Impl.hpp"
 #include "Schedule.hpp"
 #include "Schedule_Impl.hpp"
 #include "ThermalZone.hpp"
@@ -183,6 +185,30 @@ namespace detail {
 
   IddObjectType WaterHeaterStratified_Impl::iddObjectType() const {
     return WaterHeaterStratified::iddObjectType();
+  }
+
+  std::vector<ModelObject> WaterHeaterStratified_Impl::children() const
+  {
+    std::vector<ModelObject> result;
+    result.push_back(waterHeaterSizing());
+    return result;
+  }
+
+  WaterHeaterSizing WaterHeaterStratified_Impl::waterHeaterSizing() const
+  {
+    boost::optional<WaterHeaterSizing> sz;
+
+    std::vector<WaterHeaterSizing> sources = getObject<ModelObject>().getModelObjectSources<WaterHeaterSizing>(WaterHeaterSizing::iddObjectType());
+    if (sources.empty()) {
+      LOG_AND_THROW(briefDescription() << " is missing its WaterHeaterSizing object");
+    } else if (sources.size() > 1u) {
+      LOG(Error, briefDescription() << " is referenced by more than one WaterHeaterSizing object returning the first");
+      sz = sources[0];
+    } else {
+      sz = sources[0];
+    }
+
+    return sz.get();
   }
 
   std::vector<ScheduleTypeKey> WaterHeaterStratified_Impl::getScheduleTypeKeys(const Schedule& schedule) const
@@ -1350,6 +1376,10 @@ std::vector<std::string> WaterHeaterStratified::inletModeValues() {
 std::vector<std::string> WaterHeaterStratified::sourceSideFlowControlModeValues() {
   return getIddKeyNames(IddFactory::instance().getObject(iddObjectType()).get(),
                         OS_WaterHeater_StratifiedFields::SourceSideFlowControlMode);
+}
+
+WaterHeaterSizing WaterHeaterStratified::waterHeaterSizing() const {
+  return getImpl<detail::WaterHeaterStratified_Impl>()->waterHeaterSizing();
 }
 
 std::string WaterHeaterStratified::endUseSubcategory() const {
