@@ -164,7 +164,7 @@ TEST_F(ModelFixture,WaterHeaterSizing_GettersSetters) {
    * Nominal Tank Volume for Autosizing Plant Connections
    */
   // Reset first, so that we don't depend on Ctor at all
-  sz.nominalTankVolumeforAutosizingPlantConnections();
+  sz.resetNominalTankVolumeforAutosizingPlantConnections();
   EXPECT_FALSE(sz.nominalTankVolumeforAutosizingPlantConnections());
 
   // Set
