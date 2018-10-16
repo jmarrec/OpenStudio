@@ -107,6 +107,14 @@ TEST_F(ModelFixture,WaterHeaterSizing_GettersSetters) {
   model::WaterHeaterMixed wh(m);
   model::WaterHeaterSizing sz(m, wh);
 
+  EXPECT_EQ(wh.handle(), sz.waterHeater().handle());
+
+  // Another WaterToWaterComponent, but inappropriate
+  model::HeatExchangerFluidToFluid hx(m);
+  EXPECT_FALSE(sz.setWaterHeater(hx));
+  EXPECT_EQ(wh.handle(), sz.waterHeater().handle());
+
+
   // Name
 
   // Design Mode
