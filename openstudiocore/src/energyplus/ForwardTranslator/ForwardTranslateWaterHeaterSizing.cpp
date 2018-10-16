@@ -64,15 +64,11 @@ boost::optional<IdfObject> ForwardTranslator::translateWaterHeaterSizing( WaterH
   }
 
   // Water Heater Name
-  // Note JM 2018-10-16: I'm taking some precautions here, but really we only even call translation of the WaterHeaterSizing
-  // inside, and right at the end, of the FT for WaterHeaterMixed and WaterHeaterStratified, so we shoudln't get problems here...
+  // Note JM 2018-10-16: we only call translation of the WaterHeaterSizing inside - and right at the end - of the FT
+  // for WaterHeaterMixed and WaterHeaterStratified, so we shouldn't get problems here.
+  // Plus, we can call translateAndMap(wh) because it'll create a recursion.
   WaterToWaterComponent wh = modelObject.waterHeater();
-  if (boost::optional<IdfObject> _wh = translateAndMapModelObject(wh)) {
-    idfObject.setString(WaterHeater_SizingFields::WaterHeaterName, _wh->nameString());
-  } else {
-    LOG(Error, modelObject.briefDescription() << " is linked to a WaterHeater than cannot be translated.");
-    return boost::none;
-  }
+  idfObject.setString(WaterHeater_SizingFields::WaterHeaterName, wh.nameString());
 
   // Design Mode
   std::string designMode = modelObject.designMode();
