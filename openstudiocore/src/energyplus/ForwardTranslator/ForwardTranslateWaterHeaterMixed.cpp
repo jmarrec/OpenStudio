@@ -35,6 +35,7 @@
 #include "../../model/Node_Impl.hpp"
 #include "../../model/WaterHeaterMixed.hpp"
 #include "../../model/WaterHeaterMixed_Impl.hpp"
+#include "../../model/WaterHeaterSizing.hpp"
 #include "../../model/CurveCubic.hpp"
 #include "../../model/CurveCubic_Impl.hpp"
 #include "../../model/ThermalZone.hpp"
@@ -491,6 +492,11 @@ boost::optional<IdfObject> ForwardTranslator::translateWaterHeaterMixed( WaterHe
   if( (s = modelObject.endUseSubcategory()) ) {
     idfObject.setString(WaterHeater_MixedFields::EndUseSubcategory,s.get());
   }
+
+  // Note JM 2018-10-16: Call the translation of the WaterHeaterSizing Object, because we don't always translate it
+  // (WaterHeaterSizing doesn't make sense without a WaterHeater to begin with...)
+  WaterHeaterSizing sz = modelObject.waterHeaterSizing();
+  translateAndMapModelObject(sz);
 
   return boost::optional<IdfObject>(idfObject);
 }

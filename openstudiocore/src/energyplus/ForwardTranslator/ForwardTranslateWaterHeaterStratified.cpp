@@ -37,6 +37,7 @@
 #include "../../model/WaterHeaterStratified_Impl.hpp"
 #include "../../model/ThermalZone.hpp"
 #include "../../model/ThermalZone_Impl.hpp"
+#include "../../model/WaterHeaterSizing.hpp"
 #include <utilities/idd/WaterHeater_Stratified_FieldEnums.hxx>
 #include "../../utilities/idd/IddEnums.hpp"
 #include <utilities/idd/IddEnums.hxx>
@@ -627,6 +628,11 @@ boost::optional<IdfObject> ForwardTranslator::translateWaterHeaterStratified( Wa
       idfObject.setString(WaterHeater_StratifiedFields::IndirectAlternateSetpointTemperatureScheduleName,_schedule->name().get());
     }
   }
+
+  // Note JM 2018-10-16: Call the translation of the WaterHeaterSizing Object, because we don't always translate it
+  // (WaterHeaterSizing doesn't make sense without a WaterHeater to begin with...)
+  WaterHeaterSizing sz = modelObject.waterHeaterSizing();
+  translateAndMapModelObject(sz);
 
   return boost::optional<IdfObject>(idfObject);
 }
