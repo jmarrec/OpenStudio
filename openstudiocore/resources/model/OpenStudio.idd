@@ -25783,7 +25783,7 @@ OS:WaterHeater:Sizing,
        \type real
        \note Only used for Design Mode = PerUnit
        \minimum 0.0
-  N12, \field Recovery Capacity PerUnit
+  N12, \field Recovery Capacity per Unit
        \units m3/hr
        \ip-units gal/hr
        \type real
