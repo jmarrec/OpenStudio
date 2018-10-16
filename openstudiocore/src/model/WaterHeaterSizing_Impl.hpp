@@ -35,14 +35,13 @@
 namespace openstudio {
 namespace model {
 
-// TODO: Check the following class names against object getters and setters.
-class WaterHeater;
+class WaterToWaterComponent;
 
 namespace detail {
 
   /** WaterHeaterSizing_Impl is a ModelObject_Impl that is the implementation class for WaterHeaterSizing.*/
   class MODEL_API WaterHeaterSizing_Impl : public ModelObject_Impl {
-    Q_OBJECT;
+
    public:
     /** @name Constructors and Destructors */
     //@{
@@ -73,10 +72,11 @@ namespace detail {
     /** @name Getters */
     //@{
 
-    // TODO: Check return type. From object lists, some candidates are: WaterHeater.
-    WaterHeater waterHeater() const;
+    // Returns a WaterToWaterComponent, but can only be a WaterHeater:Mixed or WaterHeater:Stratified
+    WaterToWaterComponent waterHeater() const;
 
-    boost::optional<std::string> designMode() const;
+    // This field should be required in E+ IDD, so setting it to a std::string rather than an optional one
+    std::string designMode() const;
 
     boost::optional<double> timeStorageCanMeetPeakDraw() const;
 
@@ -110,67 +110,52 @@ namespace detail {
     /** @name Setters */
     //@{
 
-    // TODO: Check argument type. From object lists, some candidates are: WaterHeater.
-    bool setWaterHeater(const WaterHeater& waterHeater);
+    // Asks for a WaterToWaterComponent, but can only be a WaterHeater:Mixed or WaterHeater:Stratified
+    bool setWaterHeater(const WaterToWaterComponent& waterHeater);
 
     bool setDesignMode(const std::string& designMode);
-
     void resetDesignMode();
 
     bool setTimeStorageCanMeetPeakDraw(double timeStorageCanMeetPeakDraw);
-
     void resetTimeStorageCanMeetPeakDraw();
 
     bool setTimeforTankRecovery(double timeforTankRecovery);
-
     void resetTimeforTankRecovery();
 
     void setNominalTankVolumeforAutosizingPlantConnections(double nominalTankVolumeforAutosizingPlantConnections);
-
     void resetNominalTankVolumeforAutosizingPlantConnections();
 
     bool setNumberofBedrooms(int numberofBedrooms);
-
     void resetNumberofBedrooms();
 
     bool setNumberofBathrooms(int numberofBathrooms);
-
     void resetNumberofBathrooms();
 
     bool setStorageCapacityperPerson(double storageCapacityperPerson);
-
     void resetStorageCapacityperPerson();
 
     bool setRecoveryCapacityperPerson(double recoveryCapacityperPerson);
-
     void resetRecoveryCapacityperPerson();
 
     bool setStorageCapacityperFloorArea(double storageCapacityperFloorArea);
-
     void resetStorageCapacityperFloorArea();
 
     bool setRecoveryCapacityperFloorArea(double recoveryCapacityperFloorArea);
-
     void resetRecoveryCapacityperFloorArea();
 
     void setNumberofUnits(double numberofUnits);
-
     void resetNumberofUnits();
 
     bool setStorageCapacityperUnit(double storageCapacityperUnit);
-
     void resetStorageCapacityperUnit();
 
     bool setRecoveryCapacityPerUnit(double recoveryCapacityPerUnit);
-
     void resetRecoveryCapacityPerUnit();
 
     bool setStorageCapacityperCollectorArea(double storageCapacityperCollectorArea);
-
     void resetStorageCapacityperCollectorArea();
 
     bool setHeightAspectRatio(double heightAspectRatio);
-
     void resetHeightAspectRatio();
 
     //@}
@@ -182,11 +167,7 @@ namespace detail {
    private:
     REGISTER_LOGGER("openstudio.model.WaterHeaterSizing");
 
-    // TODO: Check the return types of these methods.
-    // Optional getters for use by methods like children() so can remove() if the constructor fails.
-    // There are other ways for the public versions of these getters to fail--perhaps all required
-    // objects should be returned as boost::optionals
-    boost::optional<WaterHeater> optionalWaterHeater() const;
+    boost::optional<WaterToWaterComponent> optionalWaterHeater() const;
   };
 
 } // detail

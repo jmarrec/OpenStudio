@@ -30,8 +30,8 @@
 #include "WaterHeaterSizing_Impl.hpp"
 
 // TODO: Check the following class names against object getters and setters.
-#include "WaterHeater.hpp"
-#include "WaterHeater_Impl.hpp"
+#include "WaterToWaterComponent.hpp"
+#include "WaterToWaterComponent_Impl.hpp"
 
 #include <utilities/idd/IddFactory.hxx>
 #include <utilities/idd/IddEnums.hxx>
@@ -80,16 +80,18 @@ namespace detail {
     return WaterHeaterSizing::iddObjectType();
   }
 
-  WaterHeater WaterHeaterSizing_Impl::waterHeater() const {
-    boost::optional<WaterHeater> value = optionalWaterHeater();
+  WaterToWaterComponent WaterHeaterSizing_Impl::waterHeater() const {
+    boost::optional<WaterToWaterComponent> value = optionalWaterHeater();
     if (!value) {
-      LOG_AND_THROW(briefDescription() << " does not have an Water Heater attached.");
+      LOG_AND_THROW(briefDescription() << " does not have a Water Heater attached.");
     }
     return value.get();
   }
 
-  boost::optional<std::string> WaterHeaterSizing_Impl::designMode() const {
-    return getString(OS_WaterHeater_SizingFields::DesignMode,true);
+  std::string WaterHeaterSizing_Impl::designMode() const {
+    boost::optional<std::string> value = getString(OS_WaterHeater_SizingFields::DesignMode, true);
+    OS_ASSERT(value);
+    return value.get();
   }
 
   boost::optional<double> WaterHeaterSizing_Impl::timeStorageCanMeetPeakDraw() const {
@@ -303,22 +305,31 @@ namespace detail {
     OS_ASSERT(result);
   }
 
-  boost::optional<WaterHeater> WaterHeaterSizing_Impl::optionalWaterHeater() const {
-    return getObject<ModelObject>().getModelObjectTarget<WaterHeater>(OS_WaterHeater_SizingFields::WaterHeaterName);
+  boost::optional<WaterToWaterComponent> WaterHeaterSizing_Impl::optionalWaterHeater() const {
+    return getObject<ModelObject>().getModelObjectTarget<WaterToWaterComponent>(OS_WaterHeater_SizingFields::WaterHeaterName);
   }
 
 } // detail
 
-WaterHeaterSizing::WaterHeaterSizing(const Model& model)
+WaterHeaterSizing::WaterHeaterSizing(const Model& model, const WaterToWaterComponent& waterHeater)
   : ModelObject(WaterHeaterSizing::iddObjectType(),model)
 {
   OS_ASSERT(getImpl<detail::WaterHeaterSizing_Impl>());
 
-  // TODO: Appropriately handle the following required object-list fields.
-  //     OS_WaterHeater_SizingFields::WaterHeaterName
+  if ( (waterHeater.iddObjectType() != OS_WaterHeater_Mixed) &&
+       (waterHeater.iddObjectType() != OS_WaterHeater_Stratified) ) {
+    LOG_AND_THROW("WaterHeaterSizing only accepts WaterHeater:Mixed or WaterHeater:Stratified");
+  }
+
   bool ok = true;
-  // ok = setWaterHeater();
+  ok = setWaterHeater(waterHeater);
   OS_ASSERT(ok);
+
+  setDesignMode("PeakDraw");
+  setTimeStorageCanMeetPeakDraw(0.538503);
+  setTimeforTankRecovery(0.0);
+  setNominalTankVolumeforAutosizingPlantConnections(1.0);
+
 }
 
 IddObjectType WaterHeaterSizing::iddObjectType() {
@@ -330,11 +341,11 @@ std::vector<std::string> WaterHeaterSizing::designModeValues() {
                         OS_WaterHeater_SizingFields::DesignMode);
 }
 
-WaterHeater WaterHeaterSizing::waterHeater() const {
+WaterToWaterComponent WaterHeaterSizing::waterHeater() const {
   return getImpl<detail::WaterHeaterSizing_Impl>()->waterHeater();
 }
 
-boost::optional<std::string> WaterHeaterSizing::designMode() const {
+std::string WaterHeaterSizing::designMode() const {
   return getImpl<detail::WaterHeaterSizing_Impl>()->designMode();
 }
 
@@ -394,7 +405,7 @@ boost::optional<double> WaterHeaterSizing::heightAspectRatio() const {
   return getImpl<detail::WaterHeaterSizing_Impl>()->heightAspectRatio();
 }
 
-bool WaterHeaterSizing::setWaterHeater(const WaterHeater& waterHeater) {
+bool WaterHeaterSizing::setWaterHeater(const WaterToWaterComponent& waterHeater) {
   return getImpl<detail::WaterHeaterSizing_Impl>()->setWaterHeater(waterHeater);
 }
 

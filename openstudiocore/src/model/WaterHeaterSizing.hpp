@@ -36,8 +36,7 @@ namespace openstudio {
 
 namespace model {
 
-// TODO: Check the following class names against object getters and setters.
-class WaterHeater;
+class WaterToWaterComponent;
 
 namespace detail {
 
@@ -51,7 +50,8 @@ class MODEL_API WaterHeaterSizing : public ModelObject {
   /** @name Constructors and Destructors */
   //@{
 
-  explicit WaterHeaterSizing(const Model& model);
+  /* This constructor only accepts WaterHeater:Mixed, or WaterHeater:Stratified */
+  explicit WaterHeaterSizing(const Model& model, const WaterToWaterComponent& waterHeater);
 
   virtual ~WaterHeaterSizing() {}
 
@@ -64,10 +64,10 @@ class MODEL_API WaterHeaterSizing : public ModelObject {
   /** @name Getters */
   //@{
 
-  // TODO: Check return type. From object lists, some candidates are: WaterHeater.
-  WaterHeater waterHeater() const;
+  // Returns a WaterToWaterComponent, but can only be a WaterHeater:Mixed or WaterHeater:Stratified
+  WaterToWaterComponent waterHeater() const;
 
-  boost::optional<std::string> designMode() const;
+  std::string designMode() const;
 
   boost::optional<double> timeStorageCanMeetPeakDraw() const;
 
@@ -101,8 +101,8 @@ class MODEL_API WaterHeaterSizing : public ModelObject {
   /** @name Setters */
   //@{
 
-  // TODO: Check argument type. From object lists, some candidates are: WaterHeater.
-  bool setWaterHeater(const WaterHeater& waterHeater);
+  // Asks for a WaterToWaterComponent, but can only be a WaterHeater:Mixed or WaterHeater:Stratified
+  bool setWaterHeater(const WaterToWaterComponent& waterHeater);
 
   bool setDesignMode(const std::string& designMode);
 
