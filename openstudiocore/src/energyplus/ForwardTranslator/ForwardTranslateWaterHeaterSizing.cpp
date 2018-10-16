@@ -64,6 +64,8 @@ boost::optional<IdfObject> ForwardTranslator::translateWaterHeaterSizing( WaterH
   }
 
   // Water Heater Name
+  // Note JM 2018-10-16: I'm taking some precautions here, but really we only even call translation of the WaterHeaterSizing
+  // inside, and right at the end, of the FT for WaterHeaterMixed and WaterHeaterStratified, so we shoudln't get problems here...
   WaterToWaterComponent wh = modelObject.waterHeater();
   if (boost::optional<IdfObject> _wh = translateAndMapModelObject(wh)) {
     idfObject.setString(WaterHeater_SizingFields::WaterHeaterName, _wh->nameString());
