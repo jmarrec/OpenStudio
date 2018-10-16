@@ -43,6 +43,7 @@ namespace model {
 class Schedule;
 class CurveCubic;
 class ThermalZone;
+class WaterHeaterSizing;
 
 namespace detail {
 
@@ -237,6 +238,8 @@ class MODEL_API WaterHeaterMixed : public WaterToWaterComponent {
   boost::optional<Schedule> indirectAlternateSetpointTemperatureSchedule() const;
 
   std::string endUseSubcategory() const;
+
+  WaterHeaterSizing waterHeaterSizing() const;
 
   //@}
   /** @name Setters */
@@ -476,4 +479,4 @@ typedef std::vector<WaterHeaterMixed> WaterHeaterMixedVector;
 } // model
 } // openstudio
 
-#endif // MODEL_WATERHEATERMIXED_HPP
+#endif // MODEL_WATERHEATERMIXED_HPP

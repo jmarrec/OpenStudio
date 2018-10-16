@@ -38,6 +38,7 @@ namespace model {
 
 class Schedule;
 class ThermalZone;
+class WaterHeaterSizing;
 
 namespace detail {
 
@@ -221,19 +222,21 @@ namespace detail {
 
     boost::optional<Schedule> indirectAlternateSetpointTemperatureSchedule() const;
 
-  boost::optional<double> autosizedTankVolume() const ;
+    boost::optional<double> autosizedTankVolume() const ;
 
-  boost::optional<double> autosizedTankHeight() const ;
+    boost::optional<double> autosizedTankHeight() const ;
 
-  boost::optional<double> autosizedHeater1Capacity() const ;
+    boost::optional<double> autosizedHeater1Capacity() const ;
 
-  boost::optional<double> autosizedUseSideDesignFlowRate() const ;
+    boost::optional<double> autosizedUseSideDesignFlowRate() const ;
 
-  boost::optional<double> autosizedSourceSideDesignFlowRate() const ;
+    boost::optional<double> autosizedSourceSideDesignFlowRate() const ;
 
-  virtual void autosize() override;
+    virtual void autosize() override;
 
-  virtual void applySizingValues() override;
+    virtual void applySizingValues() override;
+
+    WaterHeaterSizing waterHeaterSizing() const;
 
     //@}
     /** @name Setters */
@@ -421,4 +424,4 @@ namespace detail {
 } // model
 } // openstudio
 
-#endif // MODEL_WATERHEATERSTRATIFIED_IMPL_HPP
+#endif // MODEL_WATERHEATERSTRATIFIED_IMPL_HPP

@@ -39,6 +39,7 @@ namespace model {
 
 class Schedule;
 class ThermalZone;
+class WaterHeaterSizing;
 
 namespace detail {
 
@@ -216,6 +217,8 @@ class MODEL_API WaterHeaterStratified : public WaterToWaterComponent {
   std::string sourceSideFlowControlMode() const;
 
   boost::optional<Schedule> indirectAlternateSetpointTemperatureSchedule() const;
+
+  WaterHeaterSizing waterHeaterSizing() const;
 
   //@}
   /** @name Setters */
@@ -420,4 +423,4 @@ typedef std::vector<WaterHeaterStratified> WaterHeaterStratifiedVector;
 } // model
 } // openstudio
 
-#endif // MODEL_WATERHEATERSTRATIFIED_HPP
+#endif // MODEL_WATERHEATERSTRATIFIED_HPP
