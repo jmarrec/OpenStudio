@@ -33,6 +33,8 @@
 #include "Model_Impl.hpp"
 #include "WaterHeaterHeatPump.hpp"
 #include "WaterHeaterHeatPump_Impl.hpp"
+#include "WaterHeaterSizing.hpp"
+#include "WaterHeaterSizing_Impl.hpp"
 #include "Schedule.hpp"
 #include "Schedule_Impl.hpp"
 #include "ScheduleDay.hpp"
@@ -169,6 +171,30 @@ namespace detail {
 
   IddObjectType WaterHeaterMixed_Impl::iddObjectType() const {
     return WaterHeaterMixed::iddObjectType();
+  }
+
+  std::vector<ModelObject> WaterHeaterMixed_Impl::children() const
+  {
+    std::vector<ModelObject> result;
+    result.push_back(waterHeaterSizing());
+    return result;
+  }
+
+  WaterHeaterSizing WaterHeaterMixed_Impl::waterHeaterSizing() const
+  {
+    boost::optional<WaterHeaterSizing> sz;
+
+    std::vector<WaterHeaterSizing> sources = getObject<ModelObject>().getModelObjectSources<WaterHeaterSizing>(WaterHeaterSizing::iddObjectType());
+    if (sources.empty()) {
+      LOG_AND_THROW(briefDescription() << " is missing its WaterHeaterSizing object");
+    } else if (sources.size() > 1u) {
+      LOG(Error, briefDescription() << " is referenced by more than one WaterHeaterSizing object returning the first");
+      sz = sources[0];
+    } else {
+      sz = sources[0];
+    }
+
+    return sz.get();
   }
 
   std::vector<ScheduleTypeKey> WaterHeaterMixed_Impl::getScheduleTypeKeys(const Schedule& schedule) const
@@ -1891,6 +1917,10 @@ std::vector<std::string> WaterHeaterMixed::onCycleParasiticFuelTypeValues() {
 std::vector<std::string> WaterHeaterMixed::ambientTemperatureIndicatorValues() {
   return getIddKeyNames(IddFactory::instance().getObject(iddObjectType()).get(),
                         OS_WaterHeater_MixedFields::AmbientTemperatureIndicator);
+}
+
+WaterHeaterSizing WaterHeaterMixed::waterHeaterSizing() const {
+  return getImpl<detail::WaterHeaterMixed_Impl>()->waterHeaterSizing();
 }
 
 boost::optional<double> WaterHeaterMixed::tankVolume() const {

@@ -90,6 +90,7 @@ namespace detail {
 
     boost::optional<ZoneHVACComponent> containingZoneHVACComponent() const override;
 
+    virtual std::vector<ModelObject> children() const override;
 
     //@}
     /** @name Getters */

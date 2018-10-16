@@ -80,6 +80,8 @@ namespace detail {
 
     virtual unsigned demandOutletPort() override;
 
+    virtual std::vector<ModelObject> children() const override;
+
     //@}
     /** @name Getters */
     //@{
