@@ -137,8 +137,8 @@ namespace detail {
     return getDouble(OS_WaterHeater_SizingFields::StorageCapacityperUnit,true);
   }
 
-  boost::optional<double> WaterHeaterSizing_Impl::recoveryCapacityPerUnit() const {
-    return getDouble(OS_WaterHeater_SizingFields::RecoveryCapacityPerUnit,true);
+  boost::optional<double> WaterHeaterSizing_Impl::recoveryCapacityperUnit() const {
+    return getDouble(OS_WaterHeater_SizingFields::RecoveryCapacityperUnit,true);
   }
 
   boost::optional<double> WaterHeaterSizing_Impl::storageCapacityperCollectorArea() const {
@@ -163,11 +163,6 @@ namespace detail {
   bool WaterHeaterSizing_Impl::setDesignMode(const std::string& designMode) {
     bool result = setString(OS_WaterHeater_SizingFields::DesignMode, designMode);
     return result;
-  }
-
-  void WaterHeaterSizing_Impl::resetDesignMode() {
-    bool result = setString(OS_WaterHeater_SizingFields::DesignMode, "");
-    OS_ASSERT(result);
   }
 
   bool WaterHeaterSizing_Impl::setTimeStorageCanMeetPeakDraw(double timeStorageCanMeetPeakDraw) {
@@ -280,13 +275,13 @@ namespace detail {
     OS_ASSERT(result);
   }
 
-  bool WaterHeaterSizing_Impl::setRecoveryCapacityPerUnit(double recoveryCapacityPerUnit) {
-    bool result = setDouble(OS_WaterHeater_SizingFields::RecoveryCapacityPerUnit, recoveryCapacityPerUnit);
+  bool WaterHeaterSizing_Impl::setRecoveryCapacityperUnit(double recoveryCapacityperUnit) {
+    bool result = setDouble(OS_WaterHeater_SizingFields::RecoveryCapacityperUnit, recoveryCapacityperUnit);
     return result;
   }
 
-  void WaterHeaterSizing_Impl::resetRecoveryCapacityPerUnit() {
-    bool result = setString(OS_WaterHeater_SizingFields::RecoveryCapacityPerUnit, "");
+  void WaterHeaterSizing_Impl::resetRecoveryCapacityperUnit() {
+    bool result = setString(OS_WaterHeater_SizingFields::RecoveryCapacityperUnit, "");
     OS_ASSERT(result);
   }
 
@@ -399,8 +394,8 @@ boost::optional<double> WaterHeaterSizing::storageCapacityperUnit() const {
   return getImpl<detail::WaterHeaterSizing_Impl>()->storageCapacityperUnit();
 }
 
-boost::optional<double> WaterHeaterSizing::recoveryCapacityPerUnit() const {
-  return getImpl<detail::WaterHeaterSizing_Impl>()->recoveryCapacityPerUnit();
+boost::optional<double> WaterHeaterSizing::recoveryCapacityperUnit() const {
+  return getImpl<detail::WaterHeaterSizing_Impl>()->recoveryCapacityperUnit();
 }
 
 boost::optional<double> WaterHeaterSizing::storageCapacityperCollectorArea() const {
@@ -417,10 +412,6 @@ bool WaterHeaterSizing::setWaterHeater(const WaterToWaterComponent& waterHeater)
 
 bool WaterHeaterSizing::setDesignMode(const std::string& designMode) {
   return getImpl<detail::WaterHeaterSizing_Impl>()->setDesignMode(designMode);
-}
-
-void WaterHeaterSizing::resetDesignMode() {
-  getImpl<detail::WaterHeaterSizing_Impl>()->resetDesignMode();
 }
 
 bool WaterHeaterSizing::setTimeStorageCanMeetPeakDraw(double timeStorageCanMeetPeakDraw) {
@@ -511,12 +502,12 @@ void WaterHeaterSizing::resetStorageCapacityperUnit() {
   getImpl<detail::WaterHeaterSizing_Impl>()->resetStorageCapacityperUnit();
 }
 
-bool WaterHeaterSizing::setRecoveryCapacityPerUnit(double recoveryCapacityPerUnit) {
-  return getImpl<detail::WaterHeaterSizing_Impl>()->setRecoveryCapacityPerUnit(recoveryCapacityPerUnit);
+bool WaterHeaterSizing::setRecoveryCapacityperUnit(double recoveryCapacityperUnit) {
+  return getImpl<detail::WaterHeaterSizing_Impl>()->setRecoveryCapacityperUnit(recoveryCapacityperUnit);
 }
 
-void WaterHeaterSizing::resetRecoveryCapacityPerUnit() {
-  getImpl<detail::WaterHeaterSizing_Impl>()->resetRecoveryCapacityPerUnit();
+void WaterHeaterSizing::resetRecoveryCapacityperUnit() {
+  getImpl<detail::WaterHeaterSizing_Impl>()->resetRecoveryCapacityperUnit();
 }
 
 bool WaterHeaterSizing::setStorageCapacityperCollectorArea(double storageCapacityperCollectorArea) {

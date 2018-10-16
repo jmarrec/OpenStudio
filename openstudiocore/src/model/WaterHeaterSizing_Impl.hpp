@@ -100,7 +100,7 @@ namespace detail {
 
     boost::optional<double> storageCapacityperUnit() const;
 
-    boost::optional<double> recoveryCapacityPerUnit() const;
+    boost::optional<double> recoveryCapacityperUnit() const;
 
     boost::optional<double> storageCapacityperCollectorArea() const;
 
@@ -114,7 +114,6 @@ namespace detail {
     bool setWaterHeater(const WaterToWaterComponent& waterHeater);
 
     bool setDesignMode(const std::string& designMode);
-    void resetDesignMode();
 
     bool setTimeStorageCanMeetPeakDraw(double timeStorageCanMeetPeakDraw);
     void resetTimeStorageCanMeetPeakDraw();
@@ -149,8 +148,8 @@ namespace detail {
     bool setStorageCapacityperUnit(double storageCapacityperUnit);
     void resetStorageCapacityperUnit();
 
-    bool setRecoveryCapacityPerUnit(double recoveryCapacityPerUnit);
-    void resetRecoveryCapacityPerUnit();
+    bool setRecoveryCapacityperUnit(double recoveryCapacityperUnit);
+    void resetRecoveryCapacityperUnit();
 
     bool setStorageCapacityperCollectorArea(double storageCapacityperCollectorArea);
     void resetStorageCapacityperCollectorArea();

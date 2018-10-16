@@ -91,7 +91,7 @@ class MODEL_API WaterHeaterSizing : public ModelObject {
 
   boost::optional<double> storageCapacityperUnit() const;
 
-  boost::optional<double> recoveryCapacityPerUnit() const;
+  boost::optional<double> recoveryCapacityperUnit() const;
 
   boost::optional<double> storageCapacityperCollectorArea() const;
 
@@ -106,62 +106,46 @@ class MODEL_API WaterHeaterSizing : public ModelObject {
 
   bool setDesignMode(const std::string& designMode);
 
-  void resetDesignMode();
-
   bool setTimeStorageCanMeetPeakDraw(double timeStorageCanMeetPeakDraw);
-
   void resetTimeStorageCanMeetPeakDraw();
 
   bool setTimeforTankRecovery(double timeforTankRecovery);
-
   void resetTimeforTankRecovery();
 
   bool setNominalTankVolumeforAutosizingPlantConnections(double nominalTankVolumeforAutosizingPlantConnections);
-
   void resetNominalTankVolumeforAutosizingPlantConnections();
 
   bool setNumberofBedrooms(int numberofBedrooms);
-
   void resetNumberofBedrooms();
 
   bool setNumberofBathrooms(int numberofBathrooms);
-
   void resetNumberofBathrooms();
 
   bool setStorageCapacityperPerson(double storageCapacityperPerson);
-
   void resetStorageCapacityperPerson();
 
   bool setRecoveryCapacityperPerson(double recoveryCapacityperPerson);
-
   void resetRecoveryCapacityperPerson();
 
   bool setStorageCapacityperFloorArea(double storageCapacityperFloorArea);
-
   void resetStorageCapacityperFloorArea();
 
   bool setRecoveryCapacityperFloorArea(double recoveryCapacityperFloorArea);
-
   void resetRecoveryCapacityperFloorArea();
 
   bool setNumberofUnits(double numberofUnits);
-
   void resetNumberofUnits();
 
   bool setStorageCapacityperUnit(double storageCapacityperUnit);
-
   void resetStorageCapacityperUnit();
 
-  bool setRecoveryCapacityPerUnit(double recoveryCapacityPerUnit);
-
-  void resetRecoveryCapacityPerUnit();
+  bool setRecoveryCapacityperUnit(double recoveryCapacityperUnit);
+  void resetRecoveryCapacityperUnit();
 
   bool setStorageCapacityperCollectorArea(double storageCapacityperCollectorArea);
-
   void resetStorageCapacityperCollectorArea();
 
   bool setHeightAspectRatio(double heightAspectRatio);
-
   void resetHeightAspectRatio();
 
   //@}
