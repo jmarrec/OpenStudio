@@ -172,6 +172,12 @@ boost::optional<IdfObject> ForwardTranslator::translateWaterHeaterSizing( WaterH
   ***************************************************************************/
   else if (istringEqual("PerUnit", designMode)) {
     //  Number of Units
+    if ((_d = modelObject.numberofUnits())) {
+      idfObject.setDouble(WaterHeater_SizingFields::NumberofUnits, _d.get());
+    } else {
+      LOG(Error, modelObject.briefDescription() << " is missing required field 'Number of Units' and will not be translated");
+      return boost::none;
+    }
 
     //  Storage Capacity per Unit
     if ((_d = modelObject.storageCapacityperUnit())) {
