@@ -506,6 +506,7 @@ set(${target_name}_src
   ReverseTranslator/ReverseTranslateThermostatSetpointDualSetpoint.cpp
   ReverseTranslator/ReverseTranslateTimestep.cpp
   ReverseTranslator/ReverseTranslateVersion.cpp
+  ReverseTranslator/ReverseTranslateWaterHeaterSizing.cpp
   ReverseTranslator/ReverseTranslateWindowMaterialGas.cpp
   ReverseTranslator/ReverseTranslateWindowMaterialGlazing.cpp
   ReverseTranslator/ReverseTranslateWindowMaterialSimpleGlazingSystem.cpp

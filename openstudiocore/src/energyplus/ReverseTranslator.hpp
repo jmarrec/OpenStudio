@@ -72,10 +72,14 @@ class ENERGYPLUS_API ReverseTranslator {
    *  not only the direct workspace object passed into it, but also related objects under its purview.  Related objects
    *  are often identified by an object list reference pointing to them, but this rule is not absolute.  For example,
    *  AirLoopHVAC is connected to other components via node connections and the translate function for AirLoopHVAC
-   *  is responsbile for translating the components associated with the loop.  The method translateAndMapWorkspaceObject()
-   *  uses an internal map to determine if an object has already been translated, therefore there is no
-   *  concern of translating an object twice, provided that workspace objects are always translated using the
+   *  is responsbile for translating the components associated with the loop.
+   *
+   *  The method translateAndMapWorkspaceObject() uses an internal map (`m_workspaceToModelMap`) to determine
+   *  if an object has already been translated, therefore there is no concern of translating an object twice,
+   *  provided that workspace objects are always translated using the
    *  translateAndMapWorkspaceObject() interface as opposed to the type specific translators.
+   *  Method translateAndMapWorkspaceObject is also responsible for populating the internal map
+   *  if the translation of an object is successful.
    */
   boost::optional<model::ModelObject> translateAndMapWorkspaceObject(const WorkspaceObject & workspaceObject);
 
@@ -300,6 +304,8 @@ class ENERGYPLUS_API ReverseTranslator {
   boost::optional<model::ModelObject> translateTimestep(const WorkspaceObject & workspaceObject);
 
   boost::optional<model::ModelObject> translateVersion(const WorkspaceObject & workspaceObject);
+
+  boost::optional<model::ModelObject> translateWaterHeaterSizing(const WorkspaceObject & workspaceObject);
 
   boost::optional<model::ModelObject> translateWindowMaterialGas(const WorkspaceObject& workspaceObject);
 

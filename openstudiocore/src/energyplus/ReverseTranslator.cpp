@@ -942,6 +942,11 @@ boost::optional<ModelObject> ReverseTranslator::translateAndMapWorkspaceObject(c
      modelObject = translateVersion(workspaceObject );
      break;
    }
+  case openstudio::IddObjectType::WaterHeater_Sizing:
+    {
+      modelObject = translateWaterHeaterSizing(workspaceObject);
+      break;
+    }
   case openstudio::IddObjectType::WindowMaterial_Gas:
     {
       modelObject = translateWindowMaterialGas(workspaceObject);
