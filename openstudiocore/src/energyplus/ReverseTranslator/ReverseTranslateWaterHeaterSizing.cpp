@@ -68,9 +68,12 @@ OptionalModelObject ReverseTranslator::translateWaterHeaterSizing( const Workspa
         return result;
       }
     } else {
-      LOG(Error, "For " << workspaceObject.briefDescription() << ", cannot find required object 'WaterHeater Name'");
+      LOG(Error, "For " << workspaceObject.briefDescription() << ", cannot reverse translate required object 'WaterHeater Name'");
       return result;
     }
+  } else {
+    LOG(Error, "For " << workspaceObject.briefDescription() << ", cannot find required object 'WaterHeater Name'");
+    return result;
   }
 
   // Note JM 2018-10-17:
