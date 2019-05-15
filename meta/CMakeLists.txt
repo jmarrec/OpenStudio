@@ -470,7 +470,7 @@ if(BUILD_QT)
       URL_MD5 ed16ef2a30c674f91f8615678005d44c
       CONFIGURE_COMMAND sh -c "./configure ${QT_CONFIGURE_COMMAND}"
       PATCH_COMMAND ""
-      BUILD_COMMAND sh -c "make -j${CPUCOUNT} && make install"
+      BUILD_COMMAND sh -c "${MAKE} -j${CPUCOUNT} && ${MAKE} install"
       INSTALL_COMMAND ""
       BUILD_IN_SOURCE 1
     )
@@ -491,7 +491,7 @@ if(BUILD_QT)
       URL_MD5 ed16ef2a30c674f91f8615678005d44c
       CONFIGURE_COMMAND sh -c "./configure ${QT_CONFIGURE_COMMAND}"
       PATCH_COMMAND ${PATCH_EXE} -p1 < ${CMAKE_SOURCE_DIR}/../dependencies/qt/qstatic_version_tag.patch
-      BUILD_COMMAND sh -c "make -j${CPUCOUNT} && make install"
+      BUILD_COMMAND sh -c "${MAKE} -j${CPUCOUNT} && ${MAKE} install"
       INSTALL_COMMAND ""
       BUILD_IN_SOURCE 1
     )
