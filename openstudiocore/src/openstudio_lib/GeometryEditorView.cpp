@@ -65,6 +65,7 @@
 #include "../utilities/core/Assert.hpp"
 #include "../utilities/core/Checksum.hpp"
 #include "../utilities/bcl/RemoteBCL.hpp"
+#include "../utilities/core/Logger.hpp"
 #include "../utilities/geometry/FloorplanJS.hpp"
 #include "../utilities/geometry/ThreeJS.hpp"
 #include "../utilities/core/ApplicationPathHelpers.hpp"
@@ -96,11 +97,15 @@ namespace openstudio {
 
 QUrl getEmbeddedFileUrl(const QString& filename)
 {
+  // By default, use the embbeded file
   QUrl result(QString("qrc:///library/") + filename);
 
+  // But if you do find the file in the applicationDirPath, then use this one
   QString appDir = QCoreApplication::applicationDirPath();
+  LOG_FREE(Warn, "GeometryEditorView", "Looking for '" << toString(filename) << "' in appDir='" << toString(appDir) << "'");
   QFileInfo fileInfo(appDir + QString("/") + filename);
   if (fileInfo.exists() && fileInfo.isFile()) {
+    LOG_FREE(Warn, "GeometryEditorView", "Loading local file at '" << toString(fileInfo.absoluteFilePath()) << "'");
     result = QUrl::fromLocalFile(fileInfo.absoluteFilePath());
   }
 
@@ -206,7 +211,7 @@ std::map<UUID, UUID> BaseEditor::exportModelHandleMapping() const
 }
 
 void BaseEditor::onChanged()
-{  
+{
   emit changed();
   //m_document->markAsModified();
 }
@@ -1143,7 +1148,7 @@ EditorWebView::~EditorWebView()
     QString mergeWarnKeyName("geometryMergeWarn");
     bool settingsMergeWarn = settings.value(mergeWarnKeyName, true).toBool();
     if (settingsMergeWarn){
-      QMessageBox msg(QMessageBox::Question, "Unmerged Changes", "Your geometry may include unmerged changes.  Merge with Current OSM now?  Choose Ignore to skip this message in the future.", 
+      QMessageBox msg(QMessageBox::Question, "Unmerged Changes", "Your geometry may include unmerged changes.  Merge with Current OSM now?  Choose Ignore to skip this message in the future.",
         QMessageBox::Yes | QMessageBox::No | QMessageBox::Ignore, this, Qt::Dialog | Qt::MSWindowsFixedSizeDialogHint);
       msg.setDefaultButton(QMessageBox::No);
       msg.setEscapeButton(QMessageBox::No);
