@@ -241,6 +241,10 @@ if(MSVC)
   mark_as_advanced(BUILD_WITH_MULTIPLE_PROCESSES)
 endif()
 
+# Qt debug
+set(QT_USE_DEBUG OFF CACHE BOOL "Whether to use a Debug build for QT or a Release one. Most cases you want the release one.")
+mark_as_advanced(QT_USE_DEBUG)
+
 ###############################################################################
 
 ###############################################################################
@@ -959,6 +963,7 @@ add_definitions(-DSQLITE_THREADSAFE=1) # 1 is default, serial access
 set(QT_INSTALL_DIR "" CACHE PATH "Path to Qt Install")
 mark_as_advanced(QT_INSTALL_DIR)
 
+# TODO: note that this wouldn't update Qt if you already have the install dir from a previous build...
 if(NOT EXISTS ${QT_INSTALL_DIR})
   # download qt
   if( WIN32 )
@@ -976,8 +981,13 @@ if(NOT EXISTS ${QT_INSTALL_DIR})
     set(QT_ZIP_FILENAME "qt_5_6_redhat_shared.tar.gz")
     set(QT_ZIP_EXPECTED_MD5 "12576637037b8d5428e2d63a5e298131")
   else()
-    set(QT_ZIP_FILENAME "qt_5_6_linux_shared.tar.gz")
-    set(QT_ZIP_EXPECTED_MD5 "3322cce1806ef134391d94a73adf3f15")
+    if(QT_USE_DEBUG)
+      set(QT_ZIP_FILENAME "qt_5_6_linux_shared_debug.tar.gz")
+      set(QT_ZIP_EXPECTED_MD5 "768063c83a0bfa7028ec663fb8a03767")
+    else()
+      set(QT_ZIP_FILENAME "qt_5_6_linux_shared.tar.gz")
+      set(QT_ZIP_EXPECTED_MD5 "3322cce1806ef134391d94a73adf3f15")
+    endif()
   endif()
 
   set(QT_ZIP_LOCAL_PATH "${CMAKE_BINARY_DIR}/${QT_ZIP_FILENAME}")
@@ -1110,8 +1120,13 @@ elseif(EXISTS "/etc/redhat-release")
   set(QT_STATIC_ZIP_FILENAME "qt_5_6_redhat_64_static.tar.gz")
   set(QT_STATIC_ZIP_EXPECTED_MD5 "52159660cbdd95a41ab84a2c43140f11")
 else()
-  set(QT_STATIC_ZIP_FILENAME "qt_5_6_linux_64_static.tar.gz")
-  set(QT_STATIC_ZIP_EXPECTED_MD5 "77e24a44ae6c194ce1f2c3cf4aaa8a48")
+  if(QT_USE_DEBUG)
+    set(QT_STATIC_ZIP_FILENAME "qt_5_6_linux_64_static_debug.tar.gz")
+    set(QT_STATIC_ZIP_EXPECTED_MD5 "c643a47bdcfc80ddd75058e5fb8dad0e")
+  else()
+    set(QT_STATIC_ZIP_FILENAME "qt_5_6_linux_64_static.tar.gz")
+    set(QT_STATIC_ZIP_EXPECTED_MD5 "77e24a44ae6c194ce1f2c3cf4aaa8a48")
+  endif()
 endif()
 
 set(QT_STATIC_ZIP_LOCAL_PATH "${CMAKE_BINARY_DIR}/${QT_STATIC_ZIP_FILENAME}")
