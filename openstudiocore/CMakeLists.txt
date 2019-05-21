@@ -1230,6 +1230,10 @@ if( UNIX AND NOT APPLE )
     FIND_QT_STATIC_LIB("ICE.so" "*")
     FIND_QT_STATIC_LIB("Xi.so" "*")
     FIND_QT_STATIC_LIB("z.so" "*")
+    # TODO: trying to fix link errors when QT is in debug. Weird that it works on Release and doesn't on Debug.
+    FIND_QT_STATIC_LIB("libicui18n.so" "*")
+    FIND_QT_STATIC_LIB("libicuuc.so" "*")
+    FIND_QT_STATIC_LIB("libgobject-2.0.so" "*")
   endif()
 endif()
 

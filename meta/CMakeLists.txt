@@ -492,6 +492,8 @@ if(BUILD_QT)
       set(QT_CONFIGURE_COMMAND "-v ${QT_BUILD_TYPE} -opensource -static -openssl -no-pch -no-ssse3 -qt-sql-sqlite -plugin-sql-sqlite -qt-pcre -qt-harfbuzz -skip enginio -no-compile-examples -nomake examples -nomake tests -nomake tools -skip qtmultimedia -qt-xcb -confirm-license  -no-qml-debug -prefix ${CMAKE_BINARY_DIR}/Qt-prefix/src/Qt-static-install")
     else()
       message(WARNING "Shared Unix Qt build untested")
+      # Note: ensure you can find Python 2 which is required to build QtWebEngine
+      find_package(PythonInterp 2 REQUIRED)
       set(QT_CONFIGURE_COMMAND "-v ${QT_BUILD_TYPE} -opensource -shared -openssl -no-pch -no-ssse3 -qt-sql-sqlite -plugin-sql-sqlite -qt-pcre -qt-harfbuzz -skip enginio -no-compile-examples -nomake examples -nomake tests -nomake tools -skip qtmultimedia -qt-xcb -confirm-license  -no-qml-debug -prefix ${CMAKE_BINARY_DIR}/Qt-prefix/src/Qt-install")
     endif()
     ExternalProject_Add(Qt
