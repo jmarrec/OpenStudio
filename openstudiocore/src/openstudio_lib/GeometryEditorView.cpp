@@ -92,6 +92,7 @@
 #include <QDesktopServices>
 
 int CHECKFORUPDATEMSEC = 5000;
+int PROCESSEVENTTIME = 200;
 
 namespace openstudio {
 
@@ -323,7 +324,7 @@ void FloorspaceEditor::loadEditor()
     QString javascript = QString("window.api.setConfig(") + QString::fromStdString(json) + QString(");");
     m_view->page()->runJavaScript(javascript, [this](const QVariant &v) {m_javascriptRunning = false; });
     while (m_javascriptRunning){
-      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, 200);
+      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, PROCESSEVENTTIME);
     }
   }
 
@@ -336,7 +337,7 @@ void FloorspaceEditor::loadEditor()
     QString javascript = QString("window.api.init();");
     m_view->page()->runJavaScript(javascript, [this](const QVariant &v) {m_javascriptRunning = false; });
     while (m_javascriptRunning){
-      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, 200);
+      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, PROCESSEVENTTIME);
     }
   }
 
@@ -363,7 +364,7 @@ document.head.appendChild(style);\n";
 
     m_view->page()->runJavaScript(javascript, [this](const QVariant &v) {m_javascriptRunning = false; });
     while (m_javascriptRunning){
-      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, 200);
+      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, PROCESSEVENTTIME);
     }
   }
 
@@ -381,7 +382,7 @@ document.head.appendChild(style);\n";
       QString javascript = QString("window.api.openFloorplan(JSON.stringify(") + QString::fromStdString(json) + QString("), { noReloadGrid: false });");
       m_view->page()->runJavaScript(javascript, [this](const QVariant &v) {m_javascriptRunning = false; });
       while (m_javascriptRunning){
-        OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, 200);
+        OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, PROCESSEVENTTIME);
       }
 
     } else{
@@ -418,7 +419,7 @@ document.head.appendChild(style);\n";
       QString javascript = QString("window.api.importLibrary(JSON.stringify(") + QString::fromStdString(json) + QString("));");
       m_view->page()->runJavaScript(javascript, [this](const QVariant &v) {m_javascriptRunning = false; });
       while (m_javascriptRunning){
-        OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, 200);
+        OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, PROCESSEVENTTIME);
       }
     }
   }
@@ -441,7 +442,7 @@ void FloorspaceEditor::doExport()
       m_javascriptRunning = false;
     });
     while (m_javascriptRunning){
-      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, 200);
+      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, PROCESSEVENTTIME);
     }
     m_document->enable();
 
@@ -553,7 +554,7 @@ void FloorspaceEditor::updateModel(const openstudio::model::Model& model)
     //QString javascript = QString("window.api.importLibrary(JSON.stringify(") + QString::fromStdString(json) + QString("));");
     m_view->page()->runJavaScript(javascript, [this](const QVariant &v) {m_javascriptRunning = false; });
     while (m_javascriptRunning){
-      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, 200);
+      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, PROCESSEVENTTIME);
     }
   }
 }
@@ -572,7 +573,6 @@ void FloorspaceEditor::checkForUpdate()
     m_view->page()->runJavaScript(javascript, [this](const QVariant &v) {m_versionNumber = v.toUInt();  m_javascriptRunning = false; });
 
     // DLM: the javascript engine appears to stop when a file dialog is launched by the editor (e.g. to import an image)
-    int processEventsTime = 200;
     boost::posix_time::ptime start = boost::posix_time::microsec_clock::universal_time();
     while (m_javascriptRunning){
       // if the javascript is taking too long to evaluate, bail out here
@@ -583,7 +583,7 @@ void FloorspaceEditor::checkForUpdate()
       }
       // DLM: instead ignore user events
       // DLM: this is a problem during file dialogs launched by the editor
-      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, processEventsTime);
+      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, PROCESSEVENTTIME);
     }
 
     //m_document->enable();
@@ -632,7 +632,7 @@ void GbXmlEditor::loadEditor()
     QString javascript = QString("init();\n animate();");
     m_view->page()->runJavaScript(javascript, [this](const QVariant &v) {m_javascriptRunning = false; });
     while (m_javascriptRunning){
-      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, 200);
+      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, PROCESSEVENTTIME);
     }
   }
 
@@ -644,7 +644,7 @@ void GbXmlEditor::loadEditor()
     QString javascript = QString("setGbXml(\"") + m_gbXML + QString("\");");
     m_view->page()->runJavaScript(javascript, [this](const QVariant &v) {m_javascriptRunning = false; });
     while (m_javascriptRunning){
-      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, 200);
+      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, PROCESSEVENTTIME);
     }
   }
 
@@ -801,7 +801,7 @@ void IdfEditor::loadEditor()
     QString javascript = QString("setMessage(\"Failed to convert IDF to JSON format\");");
     m_view->page()->runJavaScript(javascript, [this](const QVariant &v) {m_javascriptRunning = false; });
     while (m_javascriptRunning){
-      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, 200);
+      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, PROCESSEVENTTIME);
     }
 
   } else {
@@ -812,7 +812,7 @@ void IdfEditor::loadEditor()
     QString javascript = QString("setJdf(JSON.stringify(") + m_jdf + QString("));");
     m_view->page()->runJavaScript(javascript, [this](const QVariant &v) {m_javascriptRunning = false; });
     while (m_javascriptRunning){
-      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, 200);
+      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, PROCESSEVENTTIME);
     }
   }
 
@@ -932,7 +932,7 @@ void OsmEditor::loadEditor()
     QString javascript = QString("init(") + toQString(json) + QString(");\n animate();\n initDatGui();");
     m_view->page()->runJavaScript(javascript, [this](const QVariant &v) {m_javascriptRunning = false; });
     while (m_javascriptRunning){
-      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, 200);
+      OSAppBase::instance()->processEvents(QEventLoop::ExcludeUserInputEvents, PROCESSEVENTTIME);
     }
   }
 
