@@ -9,7 +9,7 @@ class Bundle_Test < Minitest::Test
   def rm_if_exist(p)
     if File.exist?(p)
       # comment out if you want to test without rebundling
-      #FileUtils.rm_rf(p)
+      FileUtils.rm_rf(p)
     end
   end
 
@@ -90,6 +90,7 @@ class Bundle_Test < Minitest::Test
     original_dir = Dir.pwd
     Dir.chdir(File.join(File.dirname(__FILE__), 'no_bundle'))
 
+    puts "'#{OpenStudio::getOpenStudioCLI}' --verbose test.rb"
     assert(system("'#{OpenStudio::getOpenStudioCLI}' --verbose test.rb"))
     
   ensure
