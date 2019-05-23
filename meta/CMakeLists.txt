@@ -11,7 +11,7 @@ project(OpenStudioMeta)
 
 set(CMAKE_VERSION_MAJOR 2)
 set(CMAKE_VERSION_MINOR 8)
-set(CMAKE_VERSION_PATCH 0)
+set(CMAKE_VERSION_PATCH 1)
 
 set(CMAKE_VERSION_BUILD "Unknown" CACHE STRING "Build number")
 find_package(Git)
@@ -51,7 +51,7 @@ option(NIGHTLY_BUILD "Use configurations for Nightly Build" OFF)
 set(OPENSTUDIO_VERSION "${CMAKE_VERSION_MAJOR}.${CMAKE_VERSION_MINOR}.${CMAKE_VERSION_PATCH}")
 
 # Search for modules in the openstudiocore dir first to override cmake ones
-list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../openstudiocore/CMake" "${CMAKE_SOURCE_DIR}")
+list(APPEND CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/../openstudiocore/CMake" "${CMAKE_SOURCE_DIR}/../")
 
 # Build C++ documentation using Doxygen
 # Requires: doxygen
@@ -289,6 +289,7 @@ elseif(WIN32)
   endif()
   set(OPENSSL_VERSION "1.0.2a")
   set(OPENSSL_PATH "OpenSSL-Win${OPENSSL_ARCH}")
+  set(OPENSSL_ROOT_DIR "${CMAKE_BINARY_DIR}/${OPENSSL_PATH}")
   if(EXISTS "${CMAKE_BINARY_DIR}/${OPENSSL_PATH}.zip")
     file(MD5 "${CMAKE_BINARY_DIR}/${OPENSSL_PATH}.zip" OPENSSL_HASH)
   endif()
@@ -299,6 +300,7 @@ elseif(WIN32)
     execute_process(COMMAND ${CMAKE_COMMAND} -E tar xfz "${CMAKE_BINARY_DIR}/${OPENSSL_PATH}.zip" WORKING_DIRECTORY "${CMAKE_BINARY_DIR}")
   endif()
   set(OPENSSL_ROOT_DIR "${CMAKE_BINARY_DIR}/${OPENSSL_PATH}")
+  MESSAGE("OPENSSL_ROOT_DIR = ${OPENSSL_ROOT_DIR}")
 endif()
 
 if(BUILD_NODE)
@@ -326,20 +328,6 @@ endif()
 # Ruby
 option(BUILD_RUBY "Build Ruby" OFF)
 if( BUILD_RUBY )
-  if( NOT UNIX )
-
-    ExternalProject_Add(ZLib
-      URL_HASH SHA256=c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1
-      URL http://zlib.net/zlib-1.2.11.tar.gz
-      BUILD_COMMAND "${CMAKE_COMMAND}" --build "${CMAKE_BINARY_DIR}/ZLib-prefix/src/ZLib-build" --config Release --config Debug --target INSTALL
-      CMAKE_CACHE_ARGS
-        -DINSTALL_BIN_DIR:STRING=${CMAKE_BINARY_DIR}/ZLib-prefix/src/ZLib-install/bin/
-        -DINSTALL_INC_DIR:STRING=${CMAKE_BINARY_DIR}/ZLib-prefix/src/ZLib-install/include/
-        -DINSTALL_LIB_DIR:STRING=${CMAKE_BINARY_DIR}/ZLib-prefix/src/ZLib-install/lib/
-        -DINSTALL_MAN_DIR:STRING=${CMAKE_BINARY_DIR}/ZLib-prefix/src/ZLib-install/share/man/
-        -DINSTALL_PKGCONFIG_DIR:STRING=${CMAKE_BINARY_DIR}/ZLib-prefix/src/ZLib-install/share/pkgconfig/
-    )
-  endif()
 
   if( UNIX )
     set(RUBY_EXT_CONFIG "")
@@ -370,7 +358,21 @@ if( BUILD_RUBY )
     set(RUBY_EXECUTABLE "${CMAKE_BINARY_DIR}/Ruby-prefix/src/Ruby-install/bin/ruby")
     set(RUBY_SOURCE_DIR "${CMAKE_BINARY_DIR}/Ruby-prefix/src/Ruby")
     set(RUBY_INSTALL_DIR "${CMAKE_BINARY_DIR}/Ruby-prefix/src/Ruby-install")
+
   else()
+
+    ExternalProject_Add(ZLib
+      URL_HASH SHA256=c3e5e9fdd5004dcb542feda5ee4f0ff0744628baf8ed2dd5d66f8ca1197cb1a1
+      URL http://zlib.net/zlib-1.2.11.tar.gz
+      BUILD_COMMAND "${CMAKE_COMMAND}" --build "${CMAKE_BINARY_DIR}/ZLib-prefix/src/ZLib-build" --config $<CONFIG> --target INSTALL
+      CMAKE_CACHE_ARGS
+        -DINSTALL_BIN_DIR:STRING=${CMAKE_BINARY_DIR}/ZLib-prefix/src/ZLib-install/bin/
+        -DINSTALL_INC_DIR:STRING=${CMAKE_BINARY_DIR}/ZLib-prefix/src/ZLib-install/include/
+        -DINSTALL_LIB_DIR:STRING=${CMAKE_BINARY_DIR}/ZLib-prefix/src/ZLib-install/lib/
+        -DINSTALL_MAN_DIR:STRING=${CMAKE_BINARY_DIR}/ZLib-prefix/src/ZLib-install/share/man/
+        -DINSTALL_PKGCONFIG_DIR:STRING=${CMAKE_BINARY_DIR}/ZLib-prefix/src/ZLib-install/share/pkgconfig/
+    )
+
     configure_file("${CMAKE_SOURCE_DIR}/../dependencies/ruby/build_ruby.bat.in" "${CMAKE_BINARY_DIR}/build_ruby.bat")
     # This will require bison, sed, and at least ruby 1.8 in your path
     # Please install DevKit even though the build will be done by msvc the ruby build system uses some traditionally unix tools
@@ -381,10 +383,13 @@ if( BUILD_RUBY )
       BUILD_IN_SOURCE 1
       PATCH_COMMAND ${PATCH_EXE} -p1 < ${CMAKE_SOURCE_DIR}/../dependencies/ruby/Ruby.patch
       CONFIGURE_COMMAND ""
-      BUILD_COMMAND cmd /C "${CMAKE_BINARY_DIR}/build_ruby.bat"
+      BUILD_COMMAND cmd /C "${CMAKE_BINARY_DIR}/build_ruby.bat" "$<CONFIG>"
       INSTALL_COMMAND ""
     )
-    set(RUBY_INSTALL_DIR "${CMAKE_BINARY_DIR}/Ruby-prefix/src/Ruby-install")
+    set(RUBY_INSTALL_DIR "${CMAKE_BINARY_DIR}/Ruby-prefix/src/Ruby-install/$<CONFIG>")
+    
+    # tar -zcvf ruby_2_2_4_msvc2013_static.tar.gz Ruby-install
+    
   endif()
 endif()
 
