@@ -13087,13 +13087,26 @@ OS:CoolingTower:SingleSpeed,
        \minimum 0.0
        \default 0.0
        \autocalculatable
-  N6 , \field Free Convection Regime U-Factor Times Area Value
+  N6 , \field Free Convection Regime Air Flow Rate Sizing Factor
+       \type real
+       \required-field
+       \minimum> 0.0
+       \maximum< 1.0
+       \note This field is only used if the previous field is set to autocalculate.
+  N7 , \field Free Convection Regime U-Factor Times Area Value
        \type real
        \units W/K
        \minimum 0.0
        \maximum 300000.0
        \default 0.0
-       \autosizable
+       \autocalculatable
+  N8 , \field Free Convection U-Factor Times Area Value Sizing Factor
+       \type real
+       \required-field
+       \minimum> 0.0
+       \maximum< 1.0
+       \note This field is only used if the previous field is set to autocalculate and
+       \note the Performance Input Method is UFactorTimesAreaAndDesignWaterFlowRate
   A5 , \field Performance Input Method
        \type choice
        \key UFactorTimesAreaAndDesignWaterFlowRate
@@ -13102,7 +13115,10 @@ OS:CoolingTower:SingleSpeed,
        \note User can define tower thermal performance by specifying the tower UA,
        \note the Design Air Flow Rate and the Design Water Flow Rate,
        \note or by specifying the tower nominal capacity
-  N7, \field Nominal Capacity
+  N9 , \field Heat Rejection Capacity and Nominal Capacity Sizing Ratio
+       \type real
+       \required-field
+  N10, \field Nominal Capacity
        \type real
        \units W
        \minimum> 0.0
@@ -13111,17 +13127,56 @@ OS:CoolingTower:SingleSpeed,
        \note dry-bulb temperature. Design water flow rate assumed to be 5.382E-8 m3/s per watt
        \note (3 gpm/ton). Nominal tower capacity times (1.25) gives the actual tower
        \note heat rejection at these operating conditions.
-  N8 , \field Free Convection Capacity
+  N11, \field Free Convection Capacity
        \type real
        \units W
        \minimum 0.0
+       \autocalculatable
        \note Tower capacity in free convection regime with entering water at 35C (95F),
        \note leaving water at 29.44C (85F), entering air at 25.56C (78F) wet-bulb temperature
        \note and 35C (95F) dry-bulb temperature. Design water flow rate assumed to be
        \note 5.382E-8 m3/s per watt of nominal tower capacity (3 gpm/ton). Tower free
        \note convection capacity times (1.25) gives the actual tower heat rejection at these
        \note operating conditions.
-  N9 , \field Basin Heater Capacity
+  N12, \field Free Convection Nominal Capacity Sizing Factor
+       \type real
+       \required-field
+       \minimum> 0.0
+       \maximum< 1.0
+       \note This field is only used if the previous field is set to autocalculate
+  N13, \field Design Inlet Air Dry-Bulb Temperature
+       \type real
+       \units C
+       \required-field
+       \minimum 20.0
+       \note Enter the tower's design inlet air dry-bulb temperature
+  N14, \field Design Inlet Air Wet-Bulb Temperature
+       \type real
+       \units C
+       \required-field
+       \minimum 20.0
+       \note Enter the tower's design inlet air wet-bulb temperature
+  N15, \field Design Approach Temperature
+       \type real
+       \units deltaC
+       \autosizable
+       \required-field
+       \minimum> 0
+       \note Enter the approach temperature corresponding to the design inlet air
+       \note wet-bulb temperature and design range temperature.
+       \note Design approach temp = outlet water temperature minus inlet air wet-bulb temperature
+       \note at design conditions. Autosized to 3.9 deltaC.
+  N16, \field Design Range Temperature
+       \type real
+       \units deltaC
+       \autosizable
+       \required-field
+       \minimum> 0
+       \note Enter the range temperature corresponding to the design inlet air
+       \note wet-bulb temperature and design approach temperature.
+       \note Design range = inlet water temperature minus outlet water temperature
+       \note at design conditions. Autosized to 5.5 deltaC.
+  N17, \field Basin Heater Capacity
        \type real
        \units W/K
        \minimum 0.0
@@ -13129,7 +13184,7 @@ OS:CoolingTower:SingleSpeed,
        \note This heater maintains the basin water temperature at the basin heater setpoint
        \note temperature when the outdoor air temperature falls below the setpoint temperature.
        \note The basin heater only operates when water is not flowing through the tower.
-  N10, \field Basin Heater Setpoint Temperature
+  N18, \field Basin Heater Setpoint Temperature
        \type real
        \units C
        \minimum 2.0
@@ -13146,7 +13201,7 @@ OS:CoolingTower:SingleSpeed,
        \type choice
        \key LossFactor
        \key SaturatedExit
-  N11 , \field Evaporation Loss Factor
+  N19, \field Evaporation Loss Factor
        \type real
        \units percent/K
        \note Rate of water evaporation from the cooling tower and lost to the outdoor air [%/K]
@@ -13154,7 +13209,7 @@ OS:CoolingTower:SingleSpeed,
        \note Value entered here is percent-per-degree K of temperature drop in the condenser water
        \note Typical values are from 0.15 to 0.27 [%/K].
        \default 0.2
-  N12, \field Drift Loss Percent
+  N20, \field Drift Loss Percent
        \type real
        \default 0.008
        \units percent
@@ -13164,7 +13219,7 @@ OS:CoolingTower:SingleSpeed,
        \type choice
        \key ConcentrationRatio
        \key ScheduledRate
-  N13, \field Blowdown Concentration Ratio
+  N21, \field Blowdown Concentration Ratio
        \type real
        \minimum 2.0
        \default 3.0
@@ -13180,86 +13235,47 @@ OS:CoolingTower:SingleSpeed,
        \note of water in the tower basin to purge scale or other contaminants to reduce their
        \note concentration in order to maintain an acceptable level of water quality.
        \note Schedule values should reflect water usage in m3/s.
-  A10 , \field Outdoor Air Inlet Node Name
+  A10, \field Supply Water Storage Tank Name
+       \type object-list
+       \object-list WaterStorageTankNames
+  A11, \field Outdoor Air Inlet Node Name
        \type object-list
        \object-list ConnectionNames
-  A11, \field Capacity Control
+  A12, \field Capacity Control
        \type choice
        \key FanCycling
        \key FluidBypass
        \default FanCycling
-  N14, \field Number of Cells
+  N22, \field Number of Cells
        \type integer
        \minimum 1
        \default 1
-  A12, \field Cell Control
+  A13, \field Cell Control
        \type choice
        \key MinimalCell
        \key MaximalCell
        \default MinimalCell
-  N15, \field Cell Minimum  Water Flow Rate Fraction
+  N23, \field Cell Minimum  Water Flow Rate Fraction
        \type real
        \minimum> 0.0
        \maximum 1.0
        \default 0.33
        \note The allowable minimal fraction of the nominal flow rate per cell
-  N16, \field Cell Maximum Water Flow Rate Fraction
+  N24, \field Cell Maximum Water Flow Rate Fraction
        \type real
        \minimum 1
        \default 2.5
        \note The allowable maximal fraction of the nominal flow rate per cell
-  N17, \field Sizing Factor
+  N25, \field Sizing Factor
        \note Multiplies the autosized capacity and flow rates
        \type real
        \minimum> 0.0
        \default 1.0
-  N18 , \field Free Convection Regime Air Flow Rate Sizing Factor
-       \required-field
-       \type real
-       \minimum> 0.0
-       \maximum< 1.0
-  N19 , \field Free Convection U-Factor Times Area Value Sizing Factor
-       \required-field
-       \type real
-       \minimum> 0.0
-       \maximum< 1.0
-  N20 , \field Heat Rejection Capacity and Nominal Capacity Sizing Ratio
-       \required-field
-       \type real
-  N21, \field Free Convection Nominal Capacity Sizing Factor
-       \required-field
-       \type real
-       \minimum> 0.0
-       \maximum< 1.0
-  N22, \field Design Inlet Air Dry-Bulb Temperature
-       \required-field
-       \type real
-       \units C
-       \minimum 20.0
-  N23, \field Design Inlet Air Wet-Bulb Temperature
-       \required-field
-       \type real
-       \units C
-       \minimum 20.0
-  N24, \field Design Approach Temperature
-       \required-field
-       \type real
-       \units deltaC
-       \autosizable
-       \minimum> 0
-  N25, \field Design Range Temperature
-       \required-field
-       \type real
-       \units deltaC
-       \autosizable
-       \minimum> 0
-  A13, \field End-Use Subcategory
+  A13; \field End-Use Subcategory
+       \note Any text may be used here to categorize the end-uses in the ABUPS End Uses by Subcategory table.
        \required-field
        \type alpha
        \retaincase
-  A14; \field Supply Water Storage Tank Name
-       \type object-list
-       \object-list WaterStorageTankNames
 
 OS:CoolingTower:TwoSpeed,
        \min-fields 57
@@ -13518,7 +13534,7 @@ OS:CoolingTower:TwoSpeed,
        \minimum> 0.0
        \maximum 1.0
        \default 0.33
-       \note The allowable mininal fraction of the nominal flow rate per cell
+       \note The allowable minimal fraction of the nominal flow rate per cell
   N28, \field Cell Maximum Water Flow Rate Fraction
        \type real
        \minimum 1
