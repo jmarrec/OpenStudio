@@ -340,7 +340,7 @@ OS:ShadowCalculation,
        \key AverageOverDaysInFrequency
        \key TimestepFrequency
        \default AverageOverDaysInFrequency
-       
+
 OS:SimulationControl,
        \memo Note that the following 3 fields are related to the Sizing:Zone, Sizing:System,
        \memo and Sizing:Plant objects.  Having these fields set to Yes but no corresponding
@@ -433,7 +433,7 @@ OS:PerformancePrecisionTradeoffs,
        \type handle
        \required-field
   A2; \field Use Coil Direct Solutions
-      \note If Yes, an analytical or empirical solution will be used to replace iterations in 
+      \note If Yes, an analytical or empirical solution will be used to replace iterations in
       \note the coil performance calculations.
       \type choice
       \key Yes
@@ -13031,6 +13031,12 @@ OS:Chiller:Absorption,
 
 OS:CoolingTower:SingleSpeed,
        \min-fields 45
+       \memo This tower model is based on Merkel's theory, which is also the basis
+       \memo for the tower model in ASHRAE's HVAC1 Toolkit. The open wet cooling tower
+       \memo is modeled as a counter flow heat exchanger with a single-speed fan drawing air
+       \memo through the tower (induced-draft configuration).
+       \memo Added fluid bypass as an additional capacity control. 8/2008.
+       \memo For a multi-cell tower, the capacity and air/water flow rate inputs are for the entire tower.
   A1 , \field Handle
        \type handle
        \required-field
@@ -13060,27 +13066,28 @@ OS:CoolingTower:SingleSpeed,
        \units m3/s
        \minimum> 0.0
        \autosizable
-  N3 , \field Fan Power at Design Air Flow Rate
+  N3 , \field Design Fan Power
        \required-field
        \type real
        \units W
        \minimum> 0.0
        \autosizable
        \ip-units W
-  N4 , \field U-Factor Times Area Value at Design Air Flow Rate
+       \note This is the fan motor electric input power
+  N4 , \field Design U-Factor Times Area Value
        \type real
        \units W/K
        \minimum> 0.0
        \maximum 2100000.0
        \autosizable
        \note Leave field blank if tower performance input method is NominalCapacity
-  N5 , \field Air Flow Rate in Free Convection Regime
+  N5 , \field Free Convection Regime Air Flow Rate
        \type real
        \units m3/s
        \minimum 0.0
        \default 0.0
-       \autosizable
-  N6 , \field U-Factor Times Area Value at Free Convection Air Flow Rate
+       \autocalculatable
+  N6 , \field Free Convection Regime U-Factor Times Area Value
        \type real
        \units W/K
        \minimum 0.0
@@ -13088,7 +13095,7 @@ OS:CoolingTower:SingleSpeed,
        \default 0.0
        \autosizable
   A5 , \field Performance Input Method
-       \type Choice
+       \type choice
        \key UFactorTimesAreaAndDesignWaterFlowRate
        \key NominalCapacity
        \default NominalCapacity
@@ -13186,7 +13193,7 @@ OS:CoolingTower:SingleSpeed,
        \minimum 1
        \default 1
   A12, \field Cell Control
-       \type Choice
+       \type choice
        \key MinimalCell
        \key MaximalCell
        \default MinimalCell
@@ -13195,7 +13202,7 @@ OS:CoolingTower:SingleSpeed,
        \minimum> 0.0
        \maximum 1.0
        \default 0.33
-       \note The allowable mininal fraction of the nominal flow rate per cell
+       \note The allowable minimal fraction of the nominal flow rate per cell
   N16, \field Cell Maximum Water Flow Rate Fraction
        \type real
        \minimum 1
@@ -13204,9 +13211,9 @@ OS:CoolingTower:SingleSpeed,
   N17, \field Sizing Factor
        \note Multiplies the autosized capacity and flow rates
        \type real
-       \default 1.0
        \minimum> 0.0
-  N18 , \field Free Convection Air Flow Rate Sizing Factor
+       \default 1.0
+  N18 , \field Free Convection Regime Air Flow Rate Sizing Factor
        \required-field
        \type real
        \minimum> 0.0
@@ -13246,10 +13253,13 @@ OS:CoolingTower:SingleSpeed,
        \units deltaC
        \autosizable
        \minimum> 0
-  A13; \field End-Use Subcategory
+  A13, \field End-Use Subcategory
        \required-field
        \type alpha
        \retaincase
+  A14; \field Supply Water Storage Tank Name
+       \type object-list
+       \object-list WaterStorageTankNames
 
 OS:CoolingTower:TwoSpeed,
        \min-fields 57
@@ -13709,7 +13719,7 @@ OS:CoolingTower:VariableSpeed,
        \type integer
        \minimum 1
   A13, \field Cell Control
-       \type Choice
+       \type choice
        \key MinimalCell
        \key MaximalCell
   N15, \field Cell Minimum  Water Flow Rate Fraction
@@ -19398,7 +19408,7 @@ OS:EvaporativeFluidCooler:SingleSpeed,
        \minimum> 0.0
        \ip-units gal/min
   A5 , \field Performance Input Method
-       \type Choice
+       \type choice
        \key UFactorTimesAreaAndDesignWaterFlowRate
        \key StandardDesignCapacity
        \key UserSpecifiedDesignCapacity
