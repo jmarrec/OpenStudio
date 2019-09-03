@@ -141,7 +141,7 @@ VersionTranslator::VersionTranslator()
   m_updateMethods[VersionString("2.7.2")] = &VersionTranslator::update_2_7_1_to_2_7_2;
   m_updateMethods[VersionString("2.9.0")] = &VersionTranslator::update_2_8_1_to_2_9_0;
   //m_updateMethods[VersionString("2.9.0")] = &VersionTranslator::defaultUpdate;
- 
+
   // List of previous versions that may be updated to this one.
   //   - To increment the translator, add an entry for the version just released (branched for
   //     release).
@@ -4566,6 +4566,31 @@ std::string VersionTranslator::update_2_8_1_to_2_9_0(const IdfFile& idf_2_8_1, c
 
         m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
+
+    } if (iddname == "OS:CoolingTower:SingleSpeed") {
+      auto iddObject = idd_2_9_0.getObject("OS:CoolingTower:SingleSpeed");
+      IdfObject newObject(iddObject.get());
+
+      // This object had fallen pretty out of line with the E+ idd, so I realigned it: lots of move around
+      // So instead of doing regular for loops, just use a mapping of (old index, new index)
+      std::vector<std::pair<int, int> > indexPairs = {
+          {0, 0}, {1, 1}, {2, 2}, {3, 3}, {4, 4}, {5, 5},
+          {6, 6}, {7, 7}, {8, 8}, {9, 10}, {10, 12}, {11, 14},
+          {12, 15}, {13, 21}, {14, 22}, {15, 23}, {16, 24}, {17, 25},
+          {18, 26}, {19, 27}, {20, 28}, {21, 29}, {22, 31}, {23, 32},
+          {24, 33}, {25, 34}, {26, 35}, {27, 36}, {28, 37}, {29, 9},
+          {30, 11}, {31, 13}, {32, 16}, {33, 17}, {34, 18}, {35, 19},
+          {36, 20}, {37, 38},
+      };
+
+      for (const std::pair<int, int>& indexPair: indexPairs) {
+        if (value = object.getString(indexPair.first)) {
+            newObject.setString(indexPair.second, value.get());
+        }
+      }
+
+      m_refactored.push_back(RefactoredObjectData(object, newObject));
+      ss << newObject;
 
     // No-op
     } else {
