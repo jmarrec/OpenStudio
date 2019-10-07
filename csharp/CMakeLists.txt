@@ -73,8 +73,7 @@ set(OPENSTUDIO_CSHARP_DLL "${CSHARP_LIBRARY_OUTPUT_DIRECTORY}/$(ConfigurationNam
 
 
 if (MSVC)
-  # DLM: currently there are some multiply defined symbols, force them for now, investigate later
-  set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /FORCE:MULTIPLE")
+  # set(CMAKE_MODULE_LINKER_FLAGS "${CMAKE_MODULE_LINKER_FLAGS} /FORCE:MULTIPLE")
 
 # ignore deprecated warnings since we will export deprecated methods
   add_definitions(/wd4996 /bigobj)
@@ -184,14 +183,11 @@ add_library(
   ${core_wrapper_files}
 )
 add_dependencies(openstudio_csharp ${ALL_CSHARP_WRAPPER_TARGETS})
-# if (UNIX)
-#   target_link_options(openstudio_csharp
-#     PUBLIC "-Wl,--allow-multiple-definition")
-# endif()
 
 target_link_libraries(openstudio_csharp
- ${ALL_CSHARP_BINDING_DEPENDS}
- ${Boost_LIBRARIES}
+  PUBLIC "-Wl,--allow-multiple-definition"
+  ${ALL_CSHARP_BINDING_DEPENDS}
+  ${Boost_LIBRARIES}
 )
 install(TARGETS openstudio_csharp DESTINATION CSharp/openstudio/ CONFIGURATIONS DEBUG COMPONENT "CSharpAPI")
 install(TARGETS openstudio_csharp DESTINATION CSharp/openstudio/ CONFIGURATIONS RELEASE COMPONENT "CSharpAPI")
@@ -202,9 +198,22 @@ add_library(
   ${model_wrapper_files}
 )
 add_dependencies(openstudio_model_csharp ${ALL_CSHARP_WRAPPER_TARGETS})
+
+# DLM: currently there are some multiply defined symbols, force them for now, investigate later
+ # eg: multiple definition of `CSharp_OpenStudio_LeftShift__SWIG_1'
+# This is due to the ostream << operators
+
+#target_link_options(openstudio_model_csharp
+#   PUBLIC
+#   $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:"LINKER:--allow-multiple-definition">
+#   $<$<CXX_COMPILER_ID:MSVC>:"/FORCE:MULTIPLE">
+#)
 target_link_libraries(openstudio_model_csharp
- ${ALL_CSHARP_BINDING_DEPENDS}
- ${Boost_LIBRARIES}
+  PUBLIC "-Wl,--allow-multiple-definition"
+  #  $<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:"-Wl,--allow-multiple-definition">
+  #  $<$<CXX_COMPILER_ID:MSVC>:"/FORCE:MULTIPLE">
+  ${ALL_CSHARP_BINDING_DEPENDS}
+  ${Boost_LIBRARIES}
 )
 install(TARGETS openstudio_model_csharp DESTINATION CSharp/openstudio/ CONFIGURATIONS DEBUG COMPONENT "CSharpAPI")
 install(TARGETS openstudio_model_csharp DESTINATION CSharp/openstudio/ CONFIGURATIONS RELEASE COMPONENT "CSharpAPI")
@@ -216,8 +225,9 @@ add_library(
 )
 add_dependencies(openstudio_translators_csharp ${ALL_CSHARP_WRAPPER_TARGETS})
 target_link_libraries(openstudio_translators_csharp
- ${ALL_CSHARP_BINDING_DEPENDS}
- ${Boost_LIBRARIES}
+  PUBLIC "-Wl,--allow-multiple-definition"
+  ${ALL_CSHARP_BINDING_DEPENDS}
+  ${Boost_LIBRARIES}
 )
 install(TARGETS openstudio_translators_csharp DESTINATION CSharp/openstudio/ CONFIGURATIONS DEBUG COMPONENT "CSharpAPI")
 install(TARGETS openstudio_translators_csharp DESTINATION CSharp/openstudio/ CONFIGURATIONS RELEASE COMPONENT "CSharpAPI")
