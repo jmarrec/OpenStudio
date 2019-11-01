@@ -302,14 +302,14 @@ namespace boost
 
 %template(OptionalRegex) boost::optional<boost::regex>;
 
-// pugi 
+// pugi
 namespace pugi
 {
   class xml_node{
   public:
     xml_node();
   };
-  
+
   class xml_document{
   public:
     xml_document();
