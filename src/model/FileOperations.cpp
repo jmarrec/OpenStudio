@@ -123,9 +123,14 @@ namespace model {
     }
 
     // Now we recreate it, and it must work!
-    if (!openstudio::filesystem::create_directory(dest))
-    {
-      LOG_FREE(Error, "replaceDir", "Could not create destination directory: " << toString(dest));
+    try {
+      if (!openstudio::filesystem::create_directory(dest))
+      {
+        LOG_FREE(Error, "replaceDir", "Could not create destination directory: " << toString(dest));
+        return false;
+      }
+    } catch (const std::exception &e) {
+      LOG_FREE(Error, "replaceDir", "Destination directory could not be created: " << toString(dest) << "error: " << e.what());
       return false;
     }
 
