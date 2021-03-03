@@ -50,6 +50,8 @@ enum class JSONValueType
   String,
   Array,
   Object,
+  Handle,
+  Url,
   NumberOrString
 };
 
@@ -116,6 +118,10 @@ JSONValueType schemaPropertyTypeDecode(const Json::Value& type) {
     return JSONValueType::Object;
   } else if (type.asString() == "array") {
     return JSONValueType::Array;
+  } else if (type.asString() == "handle") {
+    return JSONValueType::Handle;
+  } else if (type.asString() == "url") {
+    return JSONValueType::Url;
   }
 
   return JSONValueType::NumberOrString;
@@ -358,7 +364,9 @@ Json::Value toJSON(const openstudio::IdfFile& idf, const openstudio::path& schem
       }();
 
       switch (jsonFieldType) {
-        case JSONValueType::String: {
+        case JSONValueType::String:
+        case JSONValueType::Handle:
+        case JSONValueType::Url: {
           const auto fieldString = field.getString(idx);
           if (fieldString && !fieldString->empty()) {
             visitor(fixupEnumerationValue(schema, *fieldString, type_description, group_name, fieldName, iddField.properties().type));
