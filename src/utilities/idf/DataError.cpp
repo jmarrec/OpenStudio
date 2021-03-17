@@ -44,6 +44,9 @@ DataError::DataError(unsigned fieldIndex, const IdfObject& object, DataErrorType
   if (oName) {
     m_objectName = *oName;
   }
+  if (auto ofieldName = object.iddObject().getField(m_fieldIndex)) {
+    m_fieldName = ofieldName->name();
+  }
 }
 
 DataError::DataError(const IdfObject& object, DataErrorType errorType)
@@ -89,6 +92,13 @@ std::string DataError::objectName() const {
 
 boost::optional<IddObjectType> DataError::objectType() const {
   return m_objectType;
+}
+
+std::string DataError::fieldName() const {
+  if (scope() != Scope::Field) {
+    LOG_AND_THROW("There is no field name for this DataError, which has scope " << scope().valueDescription() << ".");
+  }
+  return m_fieldName;
 }
 
 bool DataError::operator==(const DataError& otherError) const {
@@ -141,13 +151,12 @@ bool DataErrorLess::operator()(const DataError& left, const DataError& right) co
 
 std::ostream& operator<<(std::ostream& os, const DataError& error) {
 
-  os << std::setw(11) << std::left << error.scope().valueName() << "level data error of type ";
-  os << std::setw(18) << std::left << error.type().valueName() << "." << '\n';
+  os << "'" << error.scope().valueName() << "' level data error of type '" << error.type().valueName() << "'." << '\n';
 
   if (error.scope() == Scope::Field) {
     OS_ASSERT(error.objectType());
     os << "Error is in an object of type '" << error.objectType()->valueDescription();
-    os << "', named '" << error.objectName() << "', in field " << error.fieldIdentifier() << ".";
+    os << "', named '" << error.objectName() << "', in field " << error.fieldIdentifier() << " '" << error.fieldName() << "'.";
     os << '\n';
   }
 

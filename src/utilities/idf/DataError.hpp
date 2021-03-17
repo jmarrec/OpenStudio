@@ -77,6 +77,9 @@ class UTILITIES_API DataError
   /** Returns the index of the erroneous field, if scope() == Scope::Field, otherwise throws. */
   unsigned fieldIdentifier() const;
 
+  /** Returns the IddField name of the erroneous field, if scope() == Scope::Field, otherwise throws. */
+  std::string fieldName() const;
+
   /** Returns the handle of the erroneous object, if applicable. Otherwise, returned
    *  Handle.isNull(). */
   Handle objectIdentifier() const;
@@ -102,6 +105,7 @@ class UTILITIES_API DataError
   unsigned m_fieldIndex;
   Handle m_objectHandle;
   std::string m_objectName;
+  std::string m_fieldName;
   boost::optional<IddObjectType> m_objectType;
 
   REGISTER_LOGGER("utilities.idf.DataError");
