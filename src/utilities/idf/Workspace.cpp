@@ -477,6 +477,7 @@ namespace detail {
                                                           const std::vector<HUPointer>& pointersFromWorkspace, bool driverMethod,
                                                           bool expectToLosePointers, bool checkNames) {
     HandleVector newHandles;
+    HandleVector failedHandles;
     WorkspaceObjectVector newObjects;
 
     int i = 0;
@@ -518,6 +519,8 @@ namespace detail {
         newObjects.push_back(WorkspaceObject(ptr));
         this->progressValue.nano_emit(++i);
       }
+    } else {
+      failedHandles = newHandles;
     }
 
     // step 5: check validity
@@ -526,12 +529,16 @@ namespace detail {
       if ((objectImplPtrs.size() == numAllObjects()) || (level == StrictnessLevel::Final)) {
         // check whole workspace
         ok = isValid();
+        if (!ok) {
+          failedHandles = newHandles;
+        }
       } else {
         // check individual objects
         for (const WorkspaceObject& newObject : newObjects) {
-          ok = ok && newObject.isValid(level, checkNames);
-          if (!ok) {
-            break;
+          bool thisOk = newObject.isValid(level, checkNames);
+          ok = ok && thisOk;
+          if (!thisOk) {
+            failedHandles.push_back(newObject.handle());
           }
         }
       }
@@ -540,12 +547,19 @@ namespace detail {
     // step 6: rollback if necessary
     if (!ok) {
       LOG(Info, "Unable to add objects to Workspace. The validity report is: " << '\n' << validityReport());
-      nominallyRemoveObjects(newHandles);  // no validity check
+
+      newObjects.erase(std::remove_if(newObjects.begin(), newObjects.end(),
+                                      [&failedHandles](const WorkspaceObject& object) {
+                                        return std::find(failedHandles.begin(), failedHandles.end(), object.handle()) != failedHandles.end();
+                                      }),
+                       newObjects.end());
+
+      nominallyRemoveObjects(failedHandles);  // no validity check
       for (WorkspaceObject_ImplPtr& ptr : objectImplPtrs) {
-        ptr->disconnect();
+        if (std::find(failedHandles.begin(), failedHandles.end(), ptr->handle()) != failedHandles.end()) {
+          ptr->disconnect();
+        }
       }
-      newObjects.clear();
-      return newObjects;
     }
 
     // step 7: emit signals for successful completion
@@ -742,9 +756,8 @@ namespace detail {
 
     // no name conflicts---directly create and add objects
     OS_ASSERT(newObjects.empty());
-    auto it(idfObjects.begin()), itEnd(idfObjects.end());
-    for (; it != itEnd; ++it) {
-      newObjects.push_back(this->createObject(*it, keepHandles));
+    for (const auto& idfObject : idfObjects) {
+      newObjects.push_back(this->createObject(idfObject, keepHandles));
     }
     result = addObjects(newObjects, checkNames);
     if (!checkedForNameConflicts) {
