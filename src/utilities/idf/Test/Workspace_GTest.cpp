@@ -54,6 +54,9 @@
 #include <utilities/idd/BuildingSurface_Detailed_FieldEnums.hxx>
 #include <utilities/idd/Sizing_Zone_FieldEnums.hxx>
 #include <utilities/idd/OS_WeatherFile_FieldEnums.hxx>
+#include <utilities/idd/Exterior_Lights_FieldEnums.hxx>
+#include <utilities/idd/GlobalGeometryRules_FieldEnums.hxx>
+
 #include "../WorkspaceWatcher.hpp"
 #include "IdfTestQObjects.hpp"
 
@@ -2113,5 +2116,145 @@ TEST_F(IdfFixture, Workspace_getObjects_Type_StringOverload) {
     workspace.getObjectsByTypeAndName("BadEnum", "SPACE1-1");
   } catch (std::runtime_error& e) {
     EXPECT_EQ(expectedErrorMessage, std::string(e.what()));
+  }
+}
+
+TEST_F(IdfFixture, Workspace_addObject_addObjects_3351) {
+
+  /**
+  std::string idfContent = R"(
+Building,
+  My Building;             !- Name
+
+GlobalGeometryRules,
+  UpperLeftCorner,         !- Starting Vertex Position
+  CounterClockWise,        !- Vertex Entry Direction
+  Relative,                !- Coordinate System
+  Relative,                !- Daylighting Reference Point Coordinate System
+  Relative;                !- Rectangular Surface Coordinate System
+
+Schedule:Constant,AlwaysOn,On/Off,1.0;
+
+Exterior:Lights,
+  A Valid Object,          !- Name
+  AlwaysOn,                !- Schedule Name
+  5250,                    !- Design Level {W}
+  AstronomicalClock,       !- Control Option
+  Grounds Lights;          !- End-Use Subcategory
+
+Exterior:Lights,
+  An Invalid Object with wrong Choice, !- Name
+  AlwaysOn,                !- Schedule Name
+  5250,                    !- Design Level {W}
+  TheForceOfMyMind,        !- Control Option              <------- WRONG HERE
+  Grounds Lights;          !- End-Use Subcategory
+  )";
+
+  std::stringstream ss;
+
+  ss << idfContent;
+  boost::optional<IdfFile> idf = IdfFile::load(ss, IddFileType::EnergyPlus);
+  ASSERT_TRUE(idf);
+  EXPECT_EQ(5u, idf->objects().size());
+  std::vector<IdfObject> idfObjects = idf->getObjectsByType(IddObjectType::Exterior_Lights);
+  ASSERT_EQ(5u, idfObjects.size());
+*/
+
+  IdfObject idf_sch(IddObjectType::Schedule_Constant);
+  idf_sch.setName("AlwaysOn");
+
+  IdfObject idf_validExtLight(IddObjectType::Exterior_Lights);
+  idf_validExtLight.setName("A Valid Object");
+  EXPECT_TRUE(idf_validExtLight.setString(Exterior_LightsFields::ScheduleName, "AlwaysOn"));
+  EXPECT_TRUE(idf_validExtLight.setDouble(Exterior_LightsFields::DesignLevel, 5250.0));
+  EXPECT_TRUE(idf_validExtLight.setString(Exterior_LightsFields::ControlOption, "AstronomicalClock"));
+  EXPECT_TRUE(idf_validExtLight.setString(Exterior_LightsFields::EndUseSubcategory, "Grounds Lights"));
+
+  IdfObject idf_InvalidExtLight(IddObjectType::Exterior_Lights);
+  idf_InvalidExtLight.setName("An Invalid Object with wrong Choice");
+  EXPECT_TRUE(idf_InvalidExtLight.setString(Exterior_LightsFields::ScheduleName, ""));
+  EXPECT_TRUE(idf_InvalidExtLight.setDouble(Exterior_LightsFields::DesignLevel, 5250.0));
+  EXPECT_TRUE(idf_InvalidExtLight.setString(Exterior_LightsFields::ControlOption, "TheForceOfMyMind"));  // Wrong \choice field
+  EXPECT_TRUE(idf_InvalidExtLight.setString(Exterior_LightsFields::EndUseSubcategory, "Grounds Lights"));
+
+  // To avoid other warnings, we add required objects
+  IdfObject idf_geomRules(IddObjectType::GlobalGeometryRules);
+  EXPECT_TRUE(idf_geomRules.setString(GlobalGeometryRulesFields::StartingVertexPosition, "UpperLeftCorner"));
+  EXPECT_TRUE(idf_geomRules.setString(GlobalGeometryRulesFields::VertexEntryDirection, "Counterclockwise"));
+  EXPECT_TRUE(idf_geomRules.setString(GlobalGeometryRulesFields::CoordinateSystem, "Relative"));
+  EXPECT_TRUE(idf_geomRules.setString(GlobalGeometryRulesFields::DaylightingReferencePointCoordinateSystem, "Relative"));
+  EXPECT_TRUE(idf_geomRules.setString(GlobalGeometryRulesFields::RectangularSurfaceCoordinateSystem, "Relative"));
+
+  IdfObject idf_building(IddObjectType::Building);
+  idf_building.setName("My Building");
+
+  IdfObjectVector idfObjects;
+  idfObjects.push_back(idf_building);
+  idfObjects.push_back(idf_geomRules);
+  idfObjects.push_back(idf_sch);
+  idfObjects.push_back(idf_validExtLight);
+  idfObjects.push_back(idf_InvalidExtLight);
+  auto nInitialObjects = idfObjects.size();
+  EXPECT_EQ(5, nInitialObjects);
+
+  // Lambda helper to perform checks
+  auto checkWorkspaceAndAddedObjects = [&nInitialObjects](const Workspace& w, const WorkspaceObjectVector& added_objects,
+                                                          const std::string& test_case) {
+    EXPECT_EQ(nInitialObjects - 1, added_objects.size()) << test_case;  // Missing one
+
+    std::vector<WorkspaceObject> w_extLights = w.getObjectsByType(IddObjectType::Exterior_Lights);
+    EXPECT_EQ(1, w_extLights.size()) << test_case;
+
+    auto w_extLight_ = w.getObjectByTypeAndName(IddObjectType::Exterior_Lights, "A Valid Object");
+    ASSERT_TRUE(w_extLight_);
+
+    WorkspaceObject w_extLight = w_extLight_.get();
+    EXPECT_EQ("A Valid Object", w_extLight.nameString()) << test_case;
+    EXPECT_EQ("AlwaysOn", w_extLight.getString(Exterior_LightsFields::ScheduleName).get()) << test_case;
+    EXPECT_EQ(5250.0, w_extLight.getDouble(Exterior_LightsFields::DesignLevel).get()) << test_case;
+    EXPECT_EQ("AstronomicalClock", w_extLight.getString(Exterior_LightsFields::ControlOption).get()) << test_case;
+    EXPECT_EQ("Grounds Lights", w_extLight.getString(Exterior_LightsFields::EndUseSubcategory).get()) << test_case;
+
+    EXPECT_TRUE(w.isValid(StrictnessLevel::None)) << test_case;
+    EXPECT_TRUE(w.isValid(StrictnessLevel::Draft)) << test_case;
+    EXPECT_TRUE(w.isValid(StrictnessLevel::Final)) << test_case;
+  };
+
+  // Do it the addObject**s** way
+  {
+    Workspace w(StrictnessLevel::Draft, IddFileType::EnergyPlus);
+    WorkspaceObjectVector added_objects = w.addObjects(idfObjects);
+
+    // Perform checks
+    checkWorkspaceAndAddedObjects(w, added_objects, "addObjects");
+  }
+
+  // Do it the addObject way
+  // **NOTE:** It works because the objects are ordered properly**.
+  // If Schedule AlwaysOn was **after** the ExteriorLights object then the Schedule Name field would be blank
+  {
+    Workspace w(StrictnessLevel::Draft, IddFileType::EnergyPlus);
+    WorkspaceObjectVector added_objects;
+    for (const auto& idfObject : idfObjects) {
+      if (auto oWo = w.addObject(idfObject)) {
+        added_objects.push_back(oWo.get());
+      }
+    }
+
+    // Perform checks
+    checkWorkspaceAndAddedObjects(w, added_objects, "addObject");
+  }
+
+  // Do it the Workspace::load way (which does IdfFile::load, then Workspace(IdfFile&)
+  {
+    IdfFile idfFile(IddFileType::EnergyPlus);  // automatically adds version
+    idfFile.addObjects(idfObjects);
+    EXPECT_EQ(5, idfFile.objects().size());
+
+    // **NOTE**: This Ctor defaults to StrictnessLevel::None, so explicitly pass StrictnessLevel::Draft
+    Workspace w(idfFile, StrictnessLevel::Draft);
+
+    // Perform checks
+    checkWorkspaceAndAddedObjects(w, w.objects(), "Workspace::load");
   }
 }
