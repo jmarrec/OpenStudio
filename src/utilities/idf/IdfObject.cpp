@@ -35,6 +35,7 @@
 #include "ValidityReport.hpp"
 
 #include "../idd/IddKey.hpp"
+#include <sstream>
 #include <utilities/idd/IddFactory.hxx>
 #include <utilities/idd/IddEnums.hxx>
 #include "../idd/IddRegex.hpp"
@@ -1255,6 +1256,12 @@ namespace detail {
     os << '\n';
 
     return os;
+  }
+
+  std::string IdfObject_Impl::printAsString() const {
+    std::stringstream ss;
+    print(ss);
+    return ss.str();
   }
 
   std::ostream& IdfObject_Impl::printName(std::ostream& os, bool hasFields) const {

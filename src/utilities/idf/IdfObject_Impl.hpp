@@ -335,6 +335,9 @@ namespace detail {
     /** Serialize this object to os as Idf text. */
     std::ostream& print(std::ostream& os) const;
 
+    // For debugging purposes...
+    std::string printAsString() const;
+
     /** Serialize just the preceding comments and name of this IdfObject in the format used by
      *  full object print. If hasFields, the name is followed by a ','. Otherwise, the name is
      *  followed by a ';'. */

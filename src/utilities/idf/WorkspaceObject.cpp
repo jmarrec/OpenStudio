@@ -947,6 +947,41 @@ namespace detail {
     return getObject<WorkspaceObject>().idfObject();
   }
 
+  std::vector<std::pair<std::string, std::string>> WorkspaceObject_Impl::inspectFields() const {
+
+    std::vector<std::pair<std::string, std::string>> result;
+    result.reserve(m_fields.size());
+    unsigned index = 0;
+    for (const auto& field : m_fields) {
+      result.emplace_back(std::make_pair(field, fieldComment(index++, true).get()));
+    }
+
+    if (m_sourceData) {
+      bool serializeHandle = m_iddObject.hasHandleField();
+      for (const ForwardPointer& ptr : m_sourceData->pointers) {
+        if (!ptr.targetHandle.isNull()) {
+          if (serializeHandle) {
+            result[ptr.fieldIndex].second = toString(ptr.targetHandle);
+          } else {
+            OptionalString targetName = m_workspace->name(ptr.targetHandle);
+            OS_ASSERT(targetName);
+            result[ptr.fieldIndex].second = *targetName;
+          }
+        }
+      }
+    }
+
+    // TODO: I think I could just do
+    //for (size_t i = 0; i < numFields(); ++i) {
+    //  result.emplace_back(std::make_pair(getField(i).get(), fieldComment(i).get()));
+    //}
+    return result;
+  }
+
+  std::string WorkspaceObject_Impl::printWOAsString() const {
+    return idfObject().getImpl<IdfObject_Impl>()->printAsString();
+  }
+
   void WorkspaceObject_Impl::emitChangeSignals() {
     if (m_diffs.empty()) {
       return;

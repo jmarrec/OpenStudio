@@ -276,6 +276,10 @@ namespace detail {
     /** Returns equivalent IdfObject, leaving unnamed target objects unnamed. All data is cloned. */
     IdfObject idfObject() const;
 
+    std::string printWOAsString() const;
+
+    std::vector<std::pair<std::string, std::string>> inspectFields() const;
+
     //@}
     /** @name Signal Helpers */
     //@{
