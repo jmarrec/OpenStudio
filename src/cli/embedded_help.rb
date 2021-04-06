@@ -1,6 +1,5 @@
 module EmbeddedScripting
-  @@fileNames = EmbeddedScripting::allFileNamesAsString.split(';')
-
+  @@fileNames = EmbeddedScripting::fileNames()
   def self.fileNames
     @@fileNames
   end
