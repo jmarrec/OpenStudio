@@ -4,15 +4,15 @@
 
 namespace embedded_files {
 
-  static const size_t embedded_file_count = @NUMFILES@;
+  static constexpr size_t embedded_file_count = @NUMFILES@;
 
 @EMBEDDED_FILE_INCLUDES@
 
-  static const char *embedded_file_names[] = {
+  static constexpr std::array<std::string_view, embedded_file_count> embedded_file_names{ {
 @EMBEDDED_FILE_NAMES@
-  };
+  }};
 
-  static const size_t embedded_file_lens[] = {
+  static constexpr std::array<size_t, embedded_file_count>  embedded_file_lens {
 @EMBEDDED_FILE_LENS@
   };
 
