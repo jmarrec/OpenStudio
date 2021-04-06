@@ -1,5 +1,6 @@
 
 #include <string>
+#include <sstream>
 #include <fstream>
 #include <iostream>
 
@@ -50,8 +51,9 @@ int main(int argc, char *argv[])
   // This is the compressed length in chars;
   unsigned length = 0;
 
+  std::stringstream ss;
+
   if( outstream.is_open() ) {
-    outstream << "static constexpr uint8_t embedded_file_" << filenum << "[] = {";
     do {
         strm.avail_in = fread(in, 1, CHUNK, source);
         if (ferror(source)) {
@@ -72,9 +74,9 @@ int main(int argc, char *argv[])
 
             for( unsigned i = 0; i != have; ++i ) {
               if( length != 0 ) {
-                outstream << ",";
+                ss << ",";
               }
-              outstream << "0x" << std::hex << static_cast<int>(out[i]);
+              ss << "0x" << std::hex << static_cast<int>(out[i]);
               ++length;
             }
         } while (strm.avail_out == 0);
@@ -87,12 +89,15 @@ int main(int argc, char *argv[])
     /* clean up and return */
     (void)deflateEnd(&strm);
 
-    outstream << "};";
-
-    outstream << "\n";
     outstream << "static constexpr auto embedded_file_name_" << filenum << " = \"" << embeddedname << "\";";
     outstream << "\n";
     outstream << "static constexpr size_t embedded_file_len_" << filenum << " = " << std::dec << length << ";";
+    outstream << "\n";
+
+    outstream << "static constexpr std::array<uint8_t, embedded_file_len_" << filenum << "> embedded_file_" << filenum << " {";
+    outstream << ss.str();
+    outstream << "};";
+
     outstream << std::endl;
 
     outstream.close();

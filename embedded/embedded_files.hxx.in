@@ -1,3 +1,6 @@
+//#ifndef EMBEDDED_FILES_@NAMESPACE@_HXX
+//#define EMBEDDED_FILES_@NAMESPACE@_HXX
+
 #include <cstdint>
 #include <map>
 #include <vector>
@@ -5,6 +8,8 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <array>
+#include <string_view>
 
 #ifdef _MSC_VER
 #include <direct.h>
@@ -12,8 +17,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #endif
-#include <memory>
-#include <vector>
+
 
 typedef std::pair<size_t, const uint8_t *> EmbeddedFile;
 
@@ -113,15 +117,29 @@ inline int inf(const EmbeddedFile & file, std::vector<uint8_t> & result)
 
 
 namespace embedded_files {
-  const std::map<std::string, EmbeddedFile> &files();
 
-  const std::vector<std::string> &fileNames();
+  static constexpr size_t embedded_file_count = @NUMFILES@;
+
+  const std::array<std::pair<std::string_view, EmbeddedFile>, embedded_file_count>& embeddedFiles();
+
+  inline const std::array<std::string_view, embedded_file_count> &fileNames() {
+    static const std::array<std::string_view, embedded_file_count> result = []() {
+        std::array<std::string_view, embedded_file_count> val {};
+        size_t i = 0;
+        for (const auto& embeddedFile : embeddedFiles()){
+          val[i] = embeddedFile.first;
+          ++i;
+        }
+        return val;
+    }();
+    return result;
+  }
 
   inline const std::string &allFileNamesAsString(){
     static const auto return_value = [](){
       std::string result;
-      for (const auto& fileName : fileNames()){
-        result += (fileName + ";");
+      for (const auto& embeddedFile : embeddedFiles()){
+        result += (std::string{embeddedFile.first} + ";");
       }
       return result;
     }();
@@ -129,40 +147,41 @@ namespace embedded_files {
     return return_value;
   }
 
-  inline std::string findFirstFileByName(const std::string &t_filename) {
-    for (const auto& path : fileNames()){
-      if (t_filename.size() > path.size()){
-        continue;
-      }
-      if (std::equal(t_filename.rbegin(), t_filename.rend(), path.rbegin())){
-        return path;
-      }
+
+  inline std::string findFirstFileByName(const std::string& t_filename) {
+    const auto& fs = embeddedFiles();
+    auto it = std::find_if(fs.cbegin(), fs.cend(),
+            [&t_filename](const auto& embedded_file) {
+              return std::equal(t_filename.rbegin(), t_filename.rend(), embedded_file.first.rbegin());
+            }
+            );
+    if (it != fs.cend()) {
+      return std::string(it->first);
     }
     return std::string();
   }
 
   inline bool hasFile(const std::string &t_filename) {
-    const auto &fs = fileNames();
-    return (std::find(fs.begin(), fs.end(), t_filename) != fs.end());
+    const auto& fs = embeddedFiles();
+    return std::find_if(fs.cbegin(), fs.cend(), [&t_filename](const auto& embedded_file) { return embedded_file.first == t_filename; }) != fs.cend();
   }
 
   inline std::string getFileAsString(const std::string &t_filename) {
-    const auto &fs = files();
-    const auto f = fs.find(t_filename);
-    if (f == fs.end()){
-      throw std::runtime_error("Embedded file not found '" + t_filename + "'");
-    }
-    std::vector<uint8_t> inflated_data;
-    if( inf(f->second,inflated_data) != Z_OK ) {
-      throw std::runtime_error("Embedded file failed to inflate '" + t_filename + "'");
-    }
-    return std::string(inflated_data.begin(),inflated_data.end());
+      const auto& fs = embeddedFiles();
+      auto it = std::find_if(fs.cbegin(), fs.cend(), [&t_filename](const auto& embedded_file) { return embedded_file.first == t_filename; });
+      if (it == fs.cend()){
+        throw std::runtime_error("Embedded file not found '" + t_filename + "'");
+      }
+      std::vector<uint8_t> inflated_data;
+      if( inf(it->second, inflated_data) != Z_OK ) {
+        throw std::runtime_error("Embedded file failed to inflate '" + t_filename + "'");
+      }
+      return std::string(inflated_data.begin(), inflated_data.end());
   }
+
 
   inline void extractFile(const std::string &t_filename, const std::string &t_location)
   {
-    const auto &fs = files();
-
 
     const auto create_dirs = [](const std::string &t_path) {
       const auto paths = [](const std::string &t_paths) {
@@ -200,13 +219,18 @@ namespace embedded_files {
       }
     };
 
-    auto f = fs.at(t_filename);
+    const auto& fs = embeddedFiles();
+    auto it = std::find_if(fs.cbegin(), fs.cend(), [&t_filename](const auto& embedded_file) { return embedded_file.first == t_filename; });
+    if (it == fs.cend()){
+      throw std::runtime_error("Embedded file not found '" + t_filename + "'");
+    }
+
     const auto fullpath = t_location + '/' + t_filename;
     create_dirs(std::string(std::begin(fullpath), std::begin(fullpath) + fullpath.rfind('/')));
     std::ofstream ofs(fullpath);
 
     std::vector<uint8_t> inflated_data;
-    if( inf(f,inflated_data) != Z_OK ) {
+    if( inf(it->second, inflated_data) != Z_OK ) {
       throw std::runtime_error("Embedded file failed to inflate '" + t_filename + "'");
     }
 
@@ -217,4 +241,4 @@ namespace embedded_files {
 }
 
 @END_NAMESPACE@
-
+//#endif // EMBEDDED_FILES_@NAMESPACE@_HXX

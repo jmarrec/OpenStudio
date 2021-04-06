@@ -59,32 +59,14 @@ function(embed_files FILES EMBEDDED_LOCATIONS CXX_OUTPUT_FILES)
     set(EMBEDDED_FILE_INCLUDES "${EMBEDDED_FILE_INCLUDES}#include <${EMBED_SOURCE_FILE_REL_PATH}>\n")
   endforeach()
 
-  # file names
   foreach (arg RANGE ${END})
-    set(EMBEDDED_FILE_NAMES "${EMBEDDED_FILE_NAMES}    embedded_file_name_${arg}")
-    if (NOT arg EQUAL MAXFILECOUNT)
-      set(EMBEDDED_FILE_NAMES "${EMBEDDED_FILE_NAMES},")
-    endif()
-    set(EMBEDDED_FILE_NAMES "${EMBEDDED_FILE_NAMES}\n")
-  endforeach()
-
-  # lengths
-  foreach (arg RANGE ${END})
-    set(EMBEDDED_FILE_LENS "${EMBEDDED_FILE_LENS}    embedded_file_len_${arg}")
-    if (NOT arg EQUAL MAXFILECOUNT)
-      set(EMBEDDED_FILE_LENS "${EMBEDDED_FILE_LENS},")
-    endif()
-    set(EMBEDDED_FILE_LENS "${EMBEDDED_FILE_LENS}\n")
-  endforeach()
-
-  # datas
-  foreach (arg RANGE ${END})
-    set(EMBEDDED_FILES "${EMBEDDED_FILES}    embedded_file_${arg}")
+    set(EMBEDDED_FILES "${EMBEDDED_FILES}    {embedded_file_name_${arg}, {embedded_file_len_${arg}, embedded_file_${arg}.data()}}")
     if (NOT arg EQUAL MAXFILECOUNT)
       set(EMBEDDED_FILES "${EMBEDDED_FILES},")
     endif()
     set(EMBEDDED_FILES "${EMBEDDED_FILES}\n")
   endforeach()
+
 
   set_source_files_properties(${EMBED_SOURCE_FILES} PROPERTIES HEADER_FILE_ONLY TRUE)
 
