@@ -6180,19 +6180,50 @@ namespace osversion {
 
   }  // end update_3_0_1_to_3_1_0
 
-  IdfObject VersionTranslator::intializeFromObjectDeletedFields(IdfObject& oldObject, IddObject& newIddObject, std::vector<unsigned>& indexes) {
-    // Delete fields
-    auto& impl = oldObject.m_impl;  // getImpl<openstudio::detail::IdfObject_Impl>();
-    auto& fields = impl->m_fields;
-    auto& fieldComments = impl->m_fieldComments;
+  IdfObject VersionTranslator::initializeFromObjectInsertedFields(const IdfObject& oldObject, const IddObject& newIddObject,
+                                                                  const std::vector<std::pair<unsigned, std::string>>& additions) {
 
-    for (auto it = indexes.rbegin(); it != indexes.rend(); ++it) {
-      fields.erase(fields.begin() + *it);
-      fieldComments.erase(fieldComments.begin() + *it);
+    auto& impl = oldObject.m_impl;  // getImpl<openstudio::detail::IdfObject_Impl>();
+    std::vector<std::string> fields = impl->m_fields;
+    fields.reserve(fields.size() + additions.size());
+    auto fieldComments = impl->m_fieldComments;
+
+    for (auto& [idx, val] : additions) {
+      fields.insert(fields.begin() + idx, val);
+      if (fieldComments.size() >= idx) {
+        fieldComments.insert(fieldComments.begin() + idx, val);
+      }
     }
 
     // Construct objects with these fields, but with the new iddObject
     return IdfObject(std::make_shared<detail::IdfObject_Impl>(impl->m_handle, impl->m_comment, newIddObject, fields, fieldComments, false));
+  }
+
+  IdfObject VersionTranslator::initializeFromObjectDeletedFields(const IdfObject& oldObject, const IddObject& newIddObject,
+                                                                 const std::vector<unsigned>& indexes) {
+
+    auto& impl = oldObject.m_impl;  // getImpl<openstudio::detail::IdfObject_Impl>();
+    auto fields = impl->m_fields;
+    auto fieldComments = impl->m_fieldComments;
+
+    for (auto it = indexes.rbegin(); it != indexes.rend(); ++it) {
+      fields.erase(fields.begin() + *it);
+      if (fieldComments.size() >= *it) {
+        fieldComments.erase(fieldComments.begin() + *it);
+      }
+    }
+
+    // Construct objects with these fields, but with the new iddObject
+    return IdfObject(std::make_shared<detail::IdfObject_Impl>(impl->m_handle, impl->m_comment, newIddObject, fields, fieldComments, false));
+  }
+
+  IdfObject VersionTranslator::initializeFromObject(const IdfObject& oldObject, const IddObject& newIddObject) {
+
+    auto& impl = oldObject.m_impl;  // getImpl<openstudio::detail::IdfObject_Impl>();
+
+    // Construct objects with these fields, but with the new iddObject
+    return IdfObject(
+      std::make_shared<detail::IdfObject_Impl>(impl->m_handle, impl->m_comment, newIddObject, impl->m_fields, impl->m_fieldComments, false));
   }
 
   std::string VersionTranslator::update_3_1_0_to_3_2_0(const IdfFile& idf_3_1_0, const IddFileAndFactoryWrapper& idd_3_2_0) {
@@ -6252,49 +6283,22 @@ namespace osversion {
         // * Heating Design Capacity Per Floor Area = 4
         // * Fraction of Autosized Heating Design Capacity = 5
 
-        auto iddObject = idd_3_2_0.getObject(iddname);
-        IdfObject newObject(iddObject.get());
-
-        for (size_t i = 0; i < object.numFields(); ++i) {
-          if ((value = object.getString(i))) {
-            if (i < 2) {
-              newObject.setString(i, value.get());
-            } else {
-              // Every other is shifted by four fields
-              newObject.setString(i + 4, value.get());
-            }
-          }
-        }
-
-        // Set new fields per IDD default, same as Model Ctor
-        if (iddname == "OS:Coil:Heating:LowTemperatureRadiant:VariableFlow") {
-          newObject.setString(2, "HeatingDesignCapacity");
-        } else {
-          newObject.setString(2, "CoolingDesignCapacity");
-        }
-
-        newObject.setString(3, "Autosize");
-        newObject.setDouble(4, 0.0);
-        newObject.setDouble(5, 1.0);
+        auto newObject = initializeFromObjectInsertedFields(
+          object, idd_3_2_0.getObject(iddname).get(),
+          {{2, (iddname == "OS:Coil:Heating:LowTemperatureRadiant:VariableFlow") ? "HeatingDesignCapacity" : "CoolingDesignCapacity"},
+           {3, "Autosize"},
+           {4, "0.0"},
+           {5, "1.0"}});
+        std::cout << newObject << '\n';
 
         m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
 
       } else if ((iddname == "OS:Connection") || (iddname == "OS:PortList")) {
-        // Deleted the 'Name' field
-        auto iddObject = idd_3_2_0.getObject(iddname);
-        IdfObject newObject(iddObject.get());
-        for (size_t i = 0; i < object.numFields(); ++i) {
-          if ((value = object.getString(i))) {
-            if (i < 1) {
-              newObject.setString(i, value.get());
-            } else if (i == 1) {
-              // Deleted the name: no-op
-            } else {
-              newObject.setString(i - 1, value.get());
-            }
-          }
-        }
+        // Deleted the 'Name' field at position 1 (0-indexed)
+
+        auto newObject = initializeFromObjectDeletedFields(object, idd_3_2_0.getObject(iddname).get(), {1});
+
         m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;
 
@@ -6325,21 +6329,14 @@ namespace osversion {
 
         // Field 1 (0-index) 'Yes' becomes 'AdjustMixingOnly' and 'No' becomes 'None'
 
-        auto iddObject = idd_3_2_0.getObject(iddname);
-        IdfObject newObject(iddObject.get());
+        auto newObject = initializeFromObject(object, idd_3_2_0.getObject(iddname).get());
 
-        for (size_t i = 0; i < object.numFields(); ++i) {
-          if ((value = object.getString(i))) {
-            if (i == 1) {
-              std::string cur_choice = value.get();
-              if (openstudio::istringEqual("Yes", cur_choice)) {
-                newObject.setString(i, "AdjustMixingOnly");
-              } else if (openstudio::istringEqual("No", cur_choice)) {
-                newObject.setString(i, "None");
-              }
-            } else {
-              newObject.setString(i, value.get());
-            }
+        if ((value = object.getString(1))) {
+          std::string cur_choice = value.get();
+          if (openstudio::istringEqual("Yes", cur_choice)) {
+            newObject.setString(1, "AdjustMixingOnly");
+          } else if (openstudio::istringEqual("No", cur_choice)) {
+            newObject.setString(1, "None");
           }
         }
 
@@ -6350,15 +6347,7 @@ namespace osversion {
 
         // Field 13 (0-index) 'Supply Air Fan Placement' is now defaulted inside the Ctor
 
-        auto iddObject = idd_3_2_0.getObject(iddname);
-        IdfObject newObject(iddObject.get());
-
-        for (size_t i = 0; i < object.numFields(); ++i) {
-          if ((value = object.getString(i))) {
-            newObject.setString(i, value.get());
-          }
-        }
-
+        auto newObject = initializeFromObject(object, idd_3_2_0.getObject(iddname).get());
         newObject.setString(13, "DrawThrough");
 
         m_refactored.push_back(RefactoredObjectData(object, newObject));

@@ -280,8 +280,14 @@ namespace osversion {
 
     void fixInterobjectIssuesStage2_0_8_3_to_0_8_4(model::Model& model, std::shared_ptr<InterobjectIssueInformation>& info);
 
+    // additions must be sorted ascending...
+    IdfObject initializeFromObjectInsertedFields(const IdfObject& oldObject, const IddObject& newIddObject,
+                                                 const std::vector<std::pair<unsigned, std::string>>& additions);
+
     // Indexes must be sorted...
-    IdfObject intializeFromObjectDeletedFields(IdfObject& oldObject, IddObject& newIddObject, std::vector<unsigned>& indexes);
+    IdfObject initializeFromObjectDeletedFields(const IdfObject& oldObject, const IddObject& newIddObject, const std::vector<unsigned>& indexes);
+
+    IdfObject initializeFromObject(const IdfObject& oldObject, const IddObject& newIddObject);
   };
 
 }  // namespace osversion
