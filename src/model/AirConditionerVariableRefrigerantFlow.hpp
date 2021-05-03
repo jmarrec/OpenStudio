@@ -260,7 +260,7 @@ namespace model {
 
     std::string masterThermostatPriorityControlType() const;
 
-    bool setMasterThermostatPriorityControlType(std::string masterThermostatPriorityControlType);
+    bool setMasterThermostatPriorityControlType(const std::string& masterThermostatPriorityControlType);
 
     boost::optional<Schedule> thermostatPrioritySchedule() const;
 
@@ -322,11 +322,11 @@ namespace model {
 
     std::string defrostStrategy() const;
 
-    bool setDefrostStrategy(std::string defrostStrategy);
+    bool setDefrostStrategy(const std::string& defrostStrategy);
 
     std::string defrostControl() const;
 
-    bool setDefrostControl(std::string defrostControl);
+    bool setDefrostControl(const std::string& defrostControl);
 
     boost::optional<Curve> defrostEnergyInputRatioModifierFunctionofTemperatureCurve() const;
 
@@ -405,7 +405,7 @@ namespace model {
 
     std::string fuelType() const;
 
-    bool setFuelType(std::string fuelType);
+    bool setFuelType(const std::string& fuelType);
 
     double minimumOutdoorTemperatureinHeatRecoveryMode() const;
 

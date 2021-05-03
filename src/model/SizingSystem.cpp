@@ -382,7 +382,7 @@ namespace model {
       return value.get();
     }
 
-    bool SizingSystem_Impl::setTypeofLoadtoSizeOn(std::string typeofLoadtoSizeOn) {
+    bool SizingSystem_Impl::setTypeofLoadtoSizeOn(const std::string& typeofLoadtoSizeOn) {
       bool result = setString(OS_Sizing_SystemFields::TypeofLoadtoSizeOn, typeofLoadtoSizeOn);
       return result;
     }
@@ -448,7 +448,7 @@ namespace model {
       return result;
     }
 
-    bool SizingSystem_Impl::setSizingOption(std::string sizingOption) {
+    bool SizingSystem_Impl::setSizingOption(const std::string& sizingOption) {
       bool result = setString(OS_Sizing_SystemFields::SizingOption, sizingOption);
       return result;
     }
@@ -512,7 +512,7 @@ namespace model {
       OS_ASSERT(result);
     }
 
-    bool SizingSystem_Impl::setCoolingDesignAirFlowMethod(std::string coolingDesignAirFlowMethod) {
+    bool SizingSystem_Impl::setCoolingDesignAirFlowMethod(const std::string& coolingDesignAirFlowMethod) {
       bool result = setString(OS_Sizing_SystemFields::CoolingDesignAirFlowMethod, coolingDesignAirFlowMethod);
       return result;
     }
@@ -532,7 +532,7 @@ namespace model {
       OS_ASSERT(result);
     }
 
-    bool SizingSystem_Impl::setHeatingDesignAirFlowMethod(std::string heatingDesignAirFlowMethod) {
+    bool SizingSystem_Impl::setHeatingDesignAirFlowMethod(const std::string& heatingDesignAirFlowMethod) {
       bool result = setString(OS_Sizing_SystemFields::HeatingDesignAirFlowMethod, heatingDesignAirFlowMethod);
       return result;
     }
@@ -552,7 +552,7 @@ namespace model {
       OS_ASSERT(result);
     }
 
-    bool SizingSystem_Impl::setSystemOutdoorAirMethod(std::string systemOutdoorAirMethod) {
+    bool SizingSystem_Impl::setSystemOutdoorAirMethod(const std::string& systemOutdoorAirMethod) {
       bool result = setString(OS_Sizing_SystemFields::SystemOutdoorAirMethod, systemOutdoorAirMethod);
       return result;
     }
@@ -605,7 +605,7 @@ namespace model {
       return result;
     }
 
-    bool SizingSystem_Impl::setCoolingDesignCapacityMethod(std::string coolingDesignCapacityMethod) {
+    bool SizingSystem_Impl::setCoolingDesignCapacityMethod(const std::string& coolingDesignCapacityMethod) {
       bool result = setString(OS_Sizing_SystemFields::CoolingDesignCapacityMethod, coolingDesignCapacityMethod);
       return result;
     }
@@ -633,7 +633,7 @@ namespace model {
       return result;
     }
 
-    bool SizingSystem_Impl::setHeatingDesignCapacityMethod(std::string heatingDesignCapacityMethod) {
+    bool SizingSystem_Impl::setHeatingDesignCapacityMethod(const std::string& heatingDesignCapacityMethod) {
       bool result = setString(OS_Sizing_SystemFields::HeatingDesignCapacityMethod, heatingDesignCapacityMethod);
       return result;
     }
@@ -661,7 +661,7 @@ namespace model {
       return result;
     }
 
-    bool SizingSystem_Impl::setCentralCoolingCapacityControlMethod(std::string centralCoolingCapacityControlMethod) {
+    bool SizingSystem_Impl::setCentralCoolingCapacityControlMethod(const std::string& centralCoolingCapacityControlMethod) {
       bool result = setString(OS_Sizing_SystemFields::CentralCoolingCapacityControlMethod, centralCoolingCapacityControlMethod);
       return result;
     }
@@ -1258,7 +1258,7 @@ namespace model {
     return getImpl<detail::SizingSystem_Impl>()->centralCoolingCapacityControlMethod();
   }
 
-  bool SizingSystem::setTypeofLoadtoSizeOn(std::string typeofLoadtoSizeOn) {
+  bool SizingSystem::setTypeofLoadtoSizeOn(const std::string& typeofLoadtoSizeOn) {
     return getImpl<detail::SizingSystem_Impl>()->setTypeofLoadtoSizeOn(typeofLoadtoSizeOn);
   }
 
@@ -1302,7 +1302,7 @@ namespace model {
     return getImpl<detail::SizingSystem_Impl>()->setCentralHeatingDesignSupplyAirTemperature(centralHeatingDesignSupplyAirTemperature);
   }
 
-  bool SizingSystem::setSizingOption(std::string sizingOption) {
+  bool SizingSystem::setSizingOption(const std::string& sizingOption) {
     return getImpl<detail::SizingSystem_Impl>()->setSizingOption(sizingOption);
   }
 
@@ -1342,7 +1342,7 @@ namespace model {
     getImpl<detail::SizingSystem_Impl>()->resetCentralHeatingDesignSupplyAirHumidityRatio();
   }
 
-  bool SizingSystem::setCoolingDesignAirFlowMethod(std::string coolingDesignAirFlowMethod) {
+  bool SizingSystem::setCoolingDesignAirFlowMethod(const std::string& coolingDesignAirFlowMethod) {
     return getImpl<detail::SizingSystem_Impl>()->setCoolingDesignAirFlowMethod(coolingDesignAirFlowMethod);
   }
 
@@ -1358,7 +1358,7 @@ namespace model {
     getImpl<detail::SizingSystem_Impl>()->resetCoolingDesignAirFlowRate();
   }
 
-  bool SizingSystem::setHeatingDesignAirFlowMethod(std::string heatingDesignAirFlowMethod) {
+  bool SizingSystem::setHeatingDesignAirFlowMethod(const std::string& heatingDesignAirFlowMethod) {
     return getImpl<detail::SizingSystem_Impl>()->setHeatingDesignAirFlowMethod(heatingDesignAirFlowMethod);
   }
 
@@ -1374,7 +1374,7 @@ namespace model {
     getImpl<detail::SizingSystem_Impl>()->resetHeatingDesignAirFlowRate();
   }
 
-  bool SizingSystem::setSystemOutdoorAirMethod(std::string systemOutdoorAirMethod) {
+  bool SizingSystem::setSystemOutdoorAirMethod(const std::string& systemOutdoorAirMethod) {
     return getImpl<detail::SizingSystem_Impl>()->setSystemOutdoorAirMethod(systemOutdoorAirMethod);
   }
 
@@ -1417,7 +1417,7 @@ namespace model {
     return getImpl<detail::SizingSystem_Impl>()->setHeatingSupplyAirFlowRatePerUnitHeatingCapacity(heatingSupplyAirFlowRatePerUnitHeatingCapacity);
   }
 
-  bool SizingSystem::setCoolingDesignCapacityMethod(std::string coolingDesignCapacityMethod) {
+  bool SizingSystem::setCoolingDesignCapacityMethod(const std::string& coolingDesignCapacityMethod) {
     return getImpl<detail::SizingSystem_Impl>()->setCoolingDesignCapacityMethod(coolingDesignCapacityMethod);
   }
 
@@ -1437,7 +1437,7 @@ namespace model {
     return getImpl<detail::SizingSystem_Impl>()->setFractionofAutosizedCoolingDesignCapacity(fractionofAutosizedCoolingDesignCapacity);
   }
 
-  bool SizingSystem::setHeatingDesignCapacityMethod(std::string heatingDesignCapacityMethod) {
+  bool SizingSystem::setHeatingDesignCapacityMethod(const std::string& heatingDesignCapacityMethod) {
     return getImpl<detail::SizingSystem_Impl>()->setHeatingDesignCapacityMethod(heatingDesignCapacityMethod);
   }
 
@@ -1457,7 +1457,7 @@ namespace model {
     return getImpl<detail::SizingSystem_Impl>()->setFractionofAutosizedHeatingDesignCapacity(fractionofAutosizedHeatingDesignCapacity);
   }
 
-  bool SizingSystem::setCentralCoolingCapacityControlMethod(std::string centralCoolingCapacityControlMethod) {
+  bool SizingSystem::setCentralCoolingCapacityControlMethod(const std::string& centralCoolingCapacityControlMethod) {
     return getImpl<detail::SizingSystem_Impl>()->setCentralCoolingCapacityControlMethod(centralCoolingCapacityControlMethod);
   }
 

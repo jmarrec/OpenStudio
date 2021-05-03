@@ -473,7 +473,7 @@ namespace model {
       OS_ASSERT(result);
     }
 
-    bool WaterHeaterMixed_Impl::setHeaterControlType(std::string heaterControlType) {
+    bool WaterHeaterMixed_Impl::setHeaterControlType(const std::string& heaterControlType) {
       bool result = setString(OS_WaterHeater_MixedFields::HeaterControlType, heaterControlType);
       return result;
     }
@@ -538,7 +538,7 @@ namespace model {
       OS_ASSERT(result);
     }
 
-    bool WaterHeaterMixed_Impl::setHeaterFuelType(std::string heaterFuelType) {
+    bool WaterHeaterMixed_Impl::setHeaterFuelType(const std::string& heaterFuelType) {
       bool result = setString(OS_WaterHeater_MixedFields::HeaterFuelType, heaterFuelType);
       return result;
     }
@@ -643,7 +643,7 @@ namespace model {
       OS_ASSERT(result);
     }
 
-    bool WaterHeaterMixed_Impl::setAmbientTemperatureIndicator(std::string ambientTemperatureIndicator) {
+    bool WaterHeaterMixed_Impl::setAmbientTemperatureIndicator(const std::string& ambientTemperatureIndicator) {
       bool result = setString(OS_WaterHeater_MixedFields::AmbientTemperatureIndicator, ambientTemperatureIndicator);
       return result;
     }
@@ -1492,7 +1492,7 @@ namespace model {
     getImpl<detail::WaterHeaterMixed_Impl>()->resetMaximumTemperatureLimit();
   }
 
-  bool WaterHeaterMixed::setHeaterControlType(std::string heaterControlType) {
+  bool WaterHeaterMixed::setHeaterControlType(const std::string& heaterControlType) {
     return getImpl<detail::WaterHeaterMixed_Impl>()->setHeaterControlType(heaterControlType);
   }
 
@@ -1536,7 +1536,7 @@ namespace model {
     getImpl<detail::WaterHeaterMixed_Impl>()->resetHeaterIgnitionDelay();
   }
 
-  bool WaterHeaterMixed::setHeaterFuelType(std::string heaterFuelType) {
+  bool WaterHeaterMixed::setHeaterFuelType(const std::string& heaterFuelType) {
     return getImpl<detail::WaterHeaterMixed_Impl>()->setHeaterFuelType(heaterFuelType);
   }
 
@@ -1604,7 +1604,7 @@ namespace model {
     getImpl<detail::WaterHeaterMixed_Impl>()->resetOnCycleParasiticHeatFractiontoTank();
   }
 
-  bool WaterHeaterMixed::setAmbientTemperatureIndicator(std::string ambientTemperatureIndicator) {
+  bool WaterHeaterMixed::setAmbientTemperatureIndicator(const std::string& ambientTemperatureIndicator) {
     return getImpl<detail::WaterHeaterMixed_Impl>()->setAmbientTemperatureIndicator(ambientTemperatureIndicator);
   }
 
