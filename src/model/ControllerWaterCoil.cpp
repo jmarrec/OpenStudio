@@ -332,7 +332,7 @@ namespace model {
     return getImpl<detail::ControllerWaterCoil_Impl>()->isMinimumActuatedFlowDefaulted();
   }
 
-  bool ControllerWaterCoil::setControlVariable(std::string controlVariable) {
+  bool ControllerWaterCoil::setControlVariable(const std::string& controlVariable) {
     return getImpl<detail::ControllerWaterCoil_Impl>()->setControlVariable(controlVariable);
   }
 
@@ -340,7 +340,7 @@ namespace model {
     getImpl<detail::ControllerWaterCoil_Impl>()->resetControlVariable();
   }
 
-  bool ControllerWaterCoil::setAction(std::string action) {
+  bool ControllerWaterCoil::setAction(const std::string& action) {
     return getImpl<detail::ControllerWaterCoil_Impl>()->setAction(action);
   }
 
@@ -348,7 +348,7 @@ namespace model {
     getImpl<detail::ControllerWaterCoil_Impl>()->resetAction();
   }
 
-  bool ControllerWaterCoil::setActuatorVariable(std::string actuatorVariable) {
+  bool ControllerWaterCoil::setActuatorVariable(const std::string& actuatorVariable) {
     return getImpl<detail::ControllerWaterCoil_Impl>()->setActuatorVariable(actuatorVariable);
   }
 

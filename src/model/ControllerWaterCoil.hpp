@@ -101,15 +101,15 @@ namespace model {
     /** @name Setters */
     //@{
 
-    bool setControlVariable(std::string controlVariable);
+    bool setControlVariable(const std::string& controlVariable);
 
     void resetControlVariable();
 
-    bool setAction(std::string action);
+    bool setAction(const std::string& action);
 
     void resetAction();
 
-    bool setActuatorVariable(std::string actuatorVariable);
+    bool setActuatorVariable(const std::string& actuatorVariable);
 
     void resetActuatorVariable();
 

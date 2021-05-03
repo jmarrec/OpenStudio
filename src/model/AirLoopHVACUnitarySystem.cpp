@@ -1693,7 +1693,7 @@ namespace model {
     getImpl<detail::AirLoopHVACUnitarySystem_Impl>()->resetSupplyFan();
   }
 
-  bool AirLoopHVACUnitarySystem::setFanPlacement(std::string fanPlacement) {
+  bool AirLoopHVACUnitarySystem::setFanPlacement(const std::string& fanPlacement) {
     return getImpl<detail::AirLoopHVACUnitarySystem_Impl>()->setFanPlacement(fanPlacement);
   }
 
@@ -1770,7 +1770,7 @@ namespace model {
     getImpl<detail::AirLoopHVACUnitarySystem_Impl>()->resetSupplementalHeatingCoil();
   }
 
-  bool AirLoopHVACUnitarySystem::setSupplyAirFlowRateMethodDuringCoolingOperation(std::string supplyAirFlowRateMethodDuringCoolingOperation) {
+  bool AirLoopHVACUnitarySystem::setSupplyAirFlowRateMethodDuringCoolingOperation(const std::string& supplyAirFlowRateMethodDuringCoolingOperation) {
     return getImpl<detail::AirLoopHVACUnitarySystem_Impl>()->setSupplyAirFlowRateMethodDuringCoolingOperation(
       supplyAirFlowRateMethodDuringCoolingOperation);
   }
@@ -1819,7 +1819,7 @@ namespace model {
     getImpl<detail::AirLoopHVACUnitarySystem_Impl>()->resetDesignSupplyAirFlowRatePerUnitofCapacityDuringCoolingOperation();
   }
 
-  bool AirLoopHVACUnitarySystem::setSupplyAirFlowRateMethodDuringHeatingOperation(std::string supplyAirFlowRateMethodDuringHeatingOperation) {
+  bool AirLoopHVACUnitarySystem::setSupplyAirFlowRateMethodDuringHeatingOperation(const std::string& supplyAirFlowRateMethodDuringHeatingOperation) {
     return getImpl<detail::AirLoopHVACUnitarySystem_Impl>()->setSupplyAirFlowRateMethodDuringHeatingOperation(
       supplyAirFlowRateMethodDuringHeatingOperation);
   }
@@ -1967,7 +1967,7 @@ namespace model {
     getImpl<detail::AirLoopHVACUnitarySystem_Impl>()->resetMaximumOutdoorDryBulbTemperatureforSupplementalHeaterOperation();
   }
 
-  bool AirLoopHVACUnitarySystem::setOutdoorDryBulbTemperatureSensorNodeName(std::string outdoorDryBulbTemperatureSensorNodeName) {
+  bool AirLoopHVACUnitarySystem::setOutdoorDryBulbTemperatureSensorNodeName(const std::string& outdoorDryBulbTemperatureSensorNodeName) {
     return getImpl<detail::AirLoopHVACUnitarySystem_Impl>()->setOutdoorDryBulbTemperatureSensorNodeName(outdoorDryBulbTemperatureSensorNodeName);
   }
 

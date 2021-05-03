@@ -536,7 +536,7 @@ namespace model {
     getImpl<detail::AirTerminalSingleDuctVAVNoReheat_Impl>()->autosizeMaximumAirFlowRate();
   }
 
-  bool AirTerminalSingleDuctVAVNoReheat::setZoneMinimumAirFlowInputMethod(std::string zoneMinimumAirFlowInputMethod) {
+  bool AirTerminalSingleDuctVAVNoReheat::setZoneMinimumAirFlowInputMethod(const std::string& zoneMinimumAirFlowInputMethod) {
     return getImpl<detail::AirTerminalSingleDuctVAVNoReheat_Impl>()->setZoneMinimumAirFlowInputMethod(zoneMinimumAirFlowInputMethod);
   }
 

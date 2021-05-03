@@ -1564,7 +1564,7 @@ namespace model {
     getImpl<detail::WaterHeaterMixed_Impl>()->resetOffCycleParasiticFuelConsumptionRate();
   }
 
-  bool WaterHeaterMixed::setOffCycleParasiticFuelType(std::string offCycleParasiticFuelType) {
+  bool WaterHeaterMixed::setOffCycleParasiticFuelType(const std::string& offCycleParasiticFuelType) {
     return getImpl<detail::WaterHeaterMixed_Impl>()->setOffCycleParasiticFuelType(offCycleParasiticFuelType);
   }
 
@@ -1588,7 +1588,7 @@ namespace model {
     getImpl<detail::WaterHeaterMixed_Impl>()->resetOnCycleParasiticFuelConsumptionRate();
   }
 
-  bool WaterHeaterMixed::setOnCycleParasiticFuelType(std::string onCycleParasiticFuelType) {
+  bool WaterHeaterMixed::setOnCycleParasiticFuelType(const std::string& onCycleParasiticFuelType) {
     return getImpl<detail::WaterHeaterMixed_Impl>()->setOnCycleParasiticFuelType(onCycleParasiticFuelType);
   }
 
@@ -1624,7 +1624,7 @@ namespace model {
     getImpl<detail::WaterHeaterMixed_Impl>()->resetAmbientTemperatureThermalZone();
   }
 
-  bool WaterHeaterMixed::setAmbientTemperatureOutdoorAirNodeName(std::string ambientTemperatureOutdoorAirNodeName) {
+  bool WaterHeaterMixed::setAmbientTemperatureOutdoorAirNodeName(const std::string& ambientTemperatureOutdoorAirNodeName) {
     return getImpl<detail::WaterHeaterMixed_Impl>()->setAmbientTemperatureOutdoorAirNodeName(ambientTemperatureOutdoorAirNodeName);
   }
 

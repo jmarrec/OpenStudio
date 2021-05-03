@@ -1957,7 +1957,7 @@ namespace model {
     }
 
     boost::optional<SurfacePropertyExposedFoundationPerimeter>
-      Surface_Impl::createSurfacePropertyExposedFoundationPerimeter(std::string exposedPerimeterCalculationMethod, double exposedPerimeter) {
+      Surface_Impl::createSurfacePropertyExposedFoundationPerimeter(const std::string& exposedPerimeterCalculationMethod, double exposedPerimeter) {
       Surface thisSurface = getObject<Surface>();
       std::vector<SurfacePropertyExposedFoundationPerimeter> props =
         thisSurface.getModelObjectSources<SurfacePropertyExposedFoundationPerimeter>(SurfacePropertyExposedFoundationPerimeter::iddObjectType());
@@ -2316,7 +2316,7 @@ namespace model {
   }
 
   boost::optional<SurfacePropertyExposedFoundationPerimeter>
-    Surface::createSurfacePropertyExposedFoundationPerimeter(std::string exposedPerimeterCalculationMethod, double exposedPerimeter) {
+    Surface::createSurfacePropertyExposedFoundationPerimeter(const std::string& exposedPerimeterCalculationMethod, double exposedPerimeter) {
     return getImpl<detail::Surface_Impl>()->createSurfacePropertyExposedFoundationPerimeter(exposedPerimeterCalculationMethod, exposedPerimeter);
   }
 
