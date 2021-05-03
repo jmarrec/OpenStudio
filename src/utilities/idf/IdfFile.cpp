@@ -554,7 +554,7 @@ bool IdfFile::m_load(std::istream& is, ProgressBar* progressBar, bool versionOnl
   boost::mutex mtx_;
 
   // For debug
-  boost::atomic_int tid_gen(0);
+  // boost::atomic_int tid_gen(0);
 
   // read the file line by line using regexes
   while (std::getline(filt, line)) {
@@ -672,17 +672,16 @@ bool IdfFile::m_load(std::istream& is, ProgressBar* progressBar, bool versionOnl
 
         // Submit a lambda object to the pool.
         // We capture objectName, currentGroup and text by value, to avoid concurrency issues
-        boost::asio::post(pool, [this, &tid_gen,
+        boost::asio::post(pool, [this,  // &tid_gen,
                                  &mtx_, &objectNum, objectType, iddObject, text]() {
-
-          thread_local int tid = ++tid_gen;
-          std::cout << "Parsing " << objectType << " in thread ID :" << tid << "\n";
+          // thread_local int tid = ++tid_gen;
+          // std::cout << "Parsing " << objectType << " in thread ID :" << tid << "\n";
 
           OptionalIdfObject object = IdfObject::load(text, *iddObject);
           if (!object) {
-            LOG(Error, "Unable to construct IdfObject from text: " << '\n'
-                                                                   << text << '\n'
-                                                                   << "Throwing this object out and parsing the remainder of the file.");
+            // LOG(Error, "Unable to construct IdfObject from text: " << '\n'
+            //                                                        << text << '\n'
+            //                                                        << "Throwing this object out and parsing the remainder of the file.");
             return;
           } else {
             // Protect the insertion into the vector via the mutex
@@ -707,7 +706,7 @@ bool IdfFile::m_load(std::istream& is, ProgressBar* progressBar, bool versionOnl
     }
   }
 
-  std::cout << "Joining all threads" << '\n';
+  // std::cout << "Joining all threads" << '\n';
   // Don't forget to join the pool
   pool.join();
 

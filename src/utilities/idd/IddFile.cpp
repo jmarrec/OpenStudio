@@ -359,9 +359,8 @@ namespace detail {
 
         // Submit a lambda object to the pool.
         // We capture objectName, currentGroup and text by value, to avoid concurrency issues
-        boost::asio::post(pool, [this, //&tid_gen,
+        boost::asio::post(pool, [this,  //&tid_gen,
                                  &mtx_, objectName, currentGroup, text]() {
-
           //thread_local int tid = ++tid_gen;
           //std::cout << "Parsing " << objectName << " in thread ID :" << tid << "\n";
 
@@ -374,7 +373,7 @@ namespace detail {
             boost::lock_guard<boost::mutex> guard(mtx_);
             this->m_objects.push_back(*object);
           } else {
-            LOG_AND_THROW("Unable to construct IddObject from text: " << '\n' << text);
+            // LOG_AND_THROW("Unable to construct IddObject from text: " << '\n' << text);
           }
         });
       }

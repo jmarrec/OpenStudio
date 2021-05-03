@@ -6289,7 +6289,6 @@ namespace osversion {
            {3, "Autosize"},
            {4, "0.0"},
            {5, "1.0"}});
-        std::cout << newObject << '\n';
 
         m_refactored.push_back(RefactoredObjectData(object, newObject));
         ss << newObject;

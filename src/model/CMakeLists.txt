@@ -2220,6 +2220,7 @@ SET(${target_name}_benchmark_src
   benchmark/ThermalZoneCombineSpaces_Benchmark.cpp
   benchmark/Vector_remove_vs_copy_Benchmark.cpp
   benchmark/Model_ModelObjects_Benchmark.cpp
+  benchmark/IdfObjectParse_Benchmark.cpp
 )
 
 if(BUILD_BENCHMARK)
