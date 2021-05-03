@@ -1295,7 +1295,7 @@ namespace model {
       return result;
     }
 
-    bool AirLoopHVAC_Impl::setNightCycleControlType(std::string const& controlType) {
+    bool AirLoopHVAC_Impl::setNightCycleControlType(const std::string& controlType) {
       auto createNightCycleManager = [&]() {
         boost::optional<AvailabilityManagerNightCycle> result;
         auto t_model = model();
@@ -2184,7 +2184,7 @@ namespace model {
     return getImpl<detail::AirLoopHVAC_Impl>()->setAvailabilitySchedule(schedule);
   }
 
-  bool AirLoopHVAC::setNightCycleControlType(std::string const& controlType) {
+  bool AirLoopHVAC::setNightCycleControlType(const std::string& controlType) {
     return getImpl<detail::AirLoopHVAC_Impl>()->setNightCycleControlType(controlType);
   }
 
