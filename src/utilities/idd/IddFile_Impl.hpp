@@ -122,6 +122,10 @@ namespace detail {
     /// Parse file text to populate this IddFile.
     void parse(std::istream& is);
 
+    void parseNew(std::istream& is);
+
+    void parseNewParallel(std::istream& is);
+
     /// Version string required to be at top of any IddFile.
     std::string m_version;
 
