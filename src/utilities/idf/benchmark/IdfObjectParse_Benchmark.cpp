@@ -1,11 +1,10 @@
 #include <benchmark/benchmark.h>
 
-#include "../Model.hpp"
+#include "../IdfObject.hpp"
 
-#include "../../utilities/idf/IdfObject.hpp"
+#include <string>
 
 using namespace openstudio;
-using namespace openstudio::model;
 
 static void BM_ParseAirLoopHVAC(benchmark::State& state) {
   std::string text = R"(OS:AirLoopHVAC,

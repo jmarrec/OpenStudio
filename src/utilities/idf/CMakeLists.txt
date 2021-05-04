@@ -69,4 +69,6 @@ SET(idf_swig_src
 
 SET(idf_benchmark_src
   idf/benchmark/Workspace_Benchmark.cpp
+  idf/benchmark/IdfObjectParse_Benchmark.cpp
+  idf/benchmark/LoadIdfFile_Benchmark.cpp
 )

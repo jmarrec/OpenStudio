@@ -71,4 +71,5 @@ set(idd_swig_src
 
 SET(idd_benchmark_src
   idd/benchmark/LoadIdd_Benchmark.cpp
+  idd/benchmark/IddObjectParse_Benchmark.cpp
 )
