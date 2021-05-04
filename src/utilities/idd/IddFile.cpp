@@ -238,14 +238,6 @@ namespace detail {
     // this will contain matches to regular expressions
     boost::smatch matches;
 
-    // Build a thread pool to dispatch the loading of each IddObject
-    boost::asio::thread_pool pool(boost::thread::hardware_concurrency());
-    // A mutex to avoid writing to m_idfObjects at the same time
-    boost::mutex mtx_;
-
-    // For debug
-    // boost::atomic_int tid_gen(0);
-
     // read in the version from the first line
     getline(is, line);
     if (boost::regex_search(line, matches, iddRegex::version())) {
@@ -357,26 +349,384 @@ namespace detail {
           }
         }
 
-        // Submit a lambda object to the pool.
-        // We capture objectName, currentGroup and text by value, to avoid concurrency issues
-        boost::asio::post(pool, [this,  //&tid_gen,
-                                 &mtx_, objectName, currentGroup, text]() {
-          //thread_local int tid = ++tid_gen;
-          //std::cout << "Parsing " << objectName << " in thread ID :" << tid << "\n";
+        // construct the IddObject using default UserCustom type
+        OptionalIddObject object = IddObject::load(objectName, currentGroup, text);
 
-          // construct the IddObject using default UserCustom type
-          OptionalIddObject object = IddObject::load(objectName, currentGroup, text);
-
-          // construct a new object and put it in the object vector
-          if (object) {
-            // Protect the insertion into the vector via the mutex
-            boost::lock_guard<boost::mutex> guard(mtx_);
-            this->m_objects.push_back(*object);
-          } else {
-            // LOG_AND_THROW("Unable to construct IddObject from text: " << '\n' << text);
-          }
-        });
+        // construct a new object and put it in the object vector
+        if (object) {
+          m_objects.push_back(*object);
+        } else {
+          LOG_AND_THROW("Unable to construct IddObject from text: " << '\n' << text);
+        }
       }
+    }
+
+    // set header
+    m_header = header.str();
+  }
+
+  void IddFile_Impl::parseNew(std::istream& is) {
+
+    // keep track of line number in the idd
+    int lineNum = 0;
+
+    // number of object in the idd, 1 is first object
+    int objectNum = 0;
+
+    // stream for header
+    std::stringstream header;
+
+    // have we read the entire header yet
+    bool headerClosed = false;
+
+    std::string currentGroup;
+    std::string objectName;
+
+    // fake a comment only object and put it in the object list and object map
+    OptionalIddObject commentOnlyObject =
+      IddObject::load(iddRegex::commentOnlyObjectName(), currentGroup, iddRegex::commentOnlyObjectText(), IddObjectType::CommentOnly);
+    OS_ASSERT(commentOnlyObject);
+    m_objects.push_back(*commentOnlyObject);
+
+    // temp string to read file
+    std::string line;
+
+    // this will contain matches to regular expressions
+    boost::smatch matches;
+
+    // read in the version from the first line
+    getline(is, line);
+    openstudio::ascii_trim(line);
+    if (line.rfind("!IDD_Version ") == 0) {
+      m_version = line.substr(13);
+      openstudio::ascii_trim(m_version);
+      // this line belongs to the header
+      header << line << '\n';
+    } else {
+      // idd file must have a version on the first line of input
+      LOG_AND_THROW("Idd file does not contain version on first line: '" << line << "'");
+    }
+
+    // read the rest of the file line by line
+    // todo, do this by regex
+    while (!headerClosed) {
+      ++lineNum;
+
+      // remove whitespace
+      openstudio::ascii_trim(line);
+
+      if (line.empty()) {
+
+        headerClosed = true;
+
+        // empty line
+        continue;
+      }
+
+      if (line.rfind("!IDD_BUILD ") == 0) {
+        m_build = line.substr(11);
+        openstudio::ascii_trim(m_build);
+        // this line belongs to the header
+        header << line << '\n';
+
+        continue;
+      }
+
+      // Comment only: we trimmed the string AND we know it's not empty, so just check the first char
+      if (line[0] == '!') {
+
+        if (!headerClosed) {
+          header << line << '\n';
+        }
+
+        // comment only line
+         continue;
+      }
+
+      if (line.rfind("\\group ") == 0) {
+        headerClosed = true;
+
+        // get the group name
+        currentGroup = line.substr(7);
+        openstudio::ascii_trim(currentGroup);
+
+        continue;
+      }
+
+      headerClosed = true;
+    }
+
+    // Not continuing the previous one, so I can save the check for IDD_BUILD
+
+    auto isClosingLine = [](const std::string& line) {
+      // check if we have found the last field
+      if (line.size() < 3) {
+        return false;
+      }
+
+      // Should start A or N followed by a digit (or several), then should contain a ';'
+      auto c = line[0];
+      if ( !((c == 'A') || (c == 'N')) ) {
+        return false;
+      }
+
+      c = line[1];
+      if (c < '0' || c > '9') {
+        return false;
+      }
+
+      return line.find(';', 2) != std::string::npos;
+
+    }
+
+    while (getline(is, line)) {
+
+      ++lineNum;
+
+     // Throw away everything after the first '!' if any
+     if (auto pos = line.find('!'); pos != std::string::npos) {
+        line = line.substr(0, pos);
+     }
+
+      // remove whitespace
+      openstudio::ascii_trim(line);
+
+      if (line.empty()) {
+        continue;
+      }
+
+      //int beginLineNum(lineNum);
+      bool foundClosingLine(false);
+
+      // a valid idd object to parse
+      ++objectNum;
+
+      // peek at the object name for indexing in map
+      if (auto pos = line.find_first_of(",;"); pos != std::string::npos) {
+        objectName = line.substr(0, pos);//
+        openstudio::ascii_trim(objectName);
+      } else {
+        // can't figure out the object's name
+        LOG_AND_THROW("Cannot determine object name on line " << lineNum << ": '" << line << "'");
+      }
+
+      // put the text for this object in a new string
+      std::string text(line);
+
+      // check if the object has no fields
+      if (auto pos = line.find(';'); != std::string::npos) {
+        if (auto pos2 = line.find(',') != std::string::npos) {
+          if (pos2 > pos) {
+            foundClosingLine = true;
+          }
+        } else {
+          foundClosingLine = true;
+        }
+      }
+
+      // check if the object has fields, and last field on this line
+      if (isClosingLine(line)) {
+        foundClosingLine = true;
+      }
+
+      // continue reading until we have seen the entire object
+      // last line will be thrown away, requires empty line between objects in idd
+      while (getline(is, line)) {
+        ++lineNum;
+
+        // Throw away everything after the first '!' if any
+        if (auto pos = line.find('!'); pos != std::string::npos) {
+          line = line.substr(0, pos);
+        }
+
+        // remove whitespace
+        openstudio::ascii_trim(line);
+
+        // found last field and this is not a field comment
+        if (foundClosingLine && (line.empty() || (line[0] != '\\'))) {
+          break;
+        }
+
+        if (!line.empty()) {
+          // if the line is not empty add it to the text
+          // note, text does not include newlines
+          text += line;
+
+          // check if we have found the last field
+          if (isClosingLine(line)) {
+            foundClosingLine = true;
+          }
+        }
+      }
+
+      // construct the IddObject using default UserCustom type
+      OptionalIddObject object = IddObject::load(objectName, currentGroup, text);
+
+      // construct a new object and put it in the object vector
+      if (object) {
+        m_objects.push_back(*object);
+      } else {
+        LOG_AND_THROW("Unable to construct IddObject from text: " << '\n' << text);
+      }
+    }
+
+    // set header
+    m_header = header.str();
+  }
+
+
+  void IddFile_Impl::parseParallel(std::istream& is) {
+
+
+    // this will contain matches to regular expressions
+    boost::smatch matches;
+
+    // Build a thread pool to dispatch the loading of each IddObject
+    boost::asio::thread_pool pool(boost::thread::hardware_concurrency());
+    // A mutex to avoid writing to m_idfObjects at the same time
+    boost::mutex mtx_;
+
+    // For debug
+    // boost::atomic_int tid_gen(0);
+
+    // read in the version from the first line
+    getline(is, line);
+    if (boost::regex_search(line, matches, iddRegex::version())) {
+
+      m_version = std::string(matches[1].first, matches[1].second);
+
+      // this line belongs to the header
+      header << line << '\n';
+
+    } else {
+      // idd file must have a version on the first line of input
+      LOG_AND_THROW("Idd file does not contain version on first line: '" << line << "'");
+    }
+
+    // read the rest of the file line by line
+    // todo, do this by regex
+    while (getline(is, line)) {
+      ++lineNum;
+
+      // remove whitespace
+      openstudio::ascii_trim(line);
+
+      if (line.empty()) {
+
+        headerClosed = true;
+
+        // empty line
+        continue;
+      }
+
+      // This is useless, we enforce IDD_BUILD being the first line anyways
+      // if (boost::regex_search(line, matches, iddRegex::build())) {
+      // }
+
+      // We trimmed the line, and we know the line isn't empty, so just check if the first char is a '!' instead of using a regex
+      // if (boost::regex_match(line, iddRegex::commentOnlyLine())) {
+      if (line[0] == '!') {
+
+        if (!headerClosed) {
+          header << line << '\n';
+        }
+
+        // comment only line
+        continue;
+      }
+
+      if (line.rfind("\\group") == 0) {
+        std::string groupName(line.substr(7));
+
+      // if (boost::regex_search(line, matches, iddRegex::group())) {
+      //  std::string groupName(matches[1].first, matches[1].second);
+
+        headerClosed = true;
+
+        // get the group name
+        openstudio::ascii_trim(groupName);
+
+        // set the current group
+        currentGroup = groupName;
+
+        continue;
+      }
+
+      headerClosed = true;
+
+      //int beginLineNum(lineNum);
+      bool foundClosingLine(false);
+
+      // a valid idd object to parse
+      ++objectNum;
+
+      // peek at the object name for indexing in map
+      std::string objectName;
+      if (boost::regex_search(line, matches, iddRegex::line())) {
+        objectName = std::string(matches[1].first, matches[1].second);
+        openstudio::ascii_trim(objectName);
+      } else {
+        // can't figure out the object's name
+        LOG_AND_THROW("Cannot determine object name on line " << lineNum << ": '" << line << "'");
+      }
+
+      // put the text for this object in a new string
+      std::string text(line);
+
+      // check if the object has no fields
+      if (boost::regex_match(line, iddRegex::objectNoFields())) {
+        foundClosingLine = true;
+      }
+
+      // check if the object has fields, and last field on this line
+      if (boost::regex_match(line, iddRegex::closingField())) {
+        foundClosingLine = true;
+      }
+
+      // continue reading until we have seen the entire object
+      // last line will be thrown away, requires empty line between objects in idd
+      while (getline(is, line)) {
+        ++lineNum;
+
+        // remove whitespace
+        openstudio::ascii_trim(line);
+
+        // found last field and this is not a field comment
+        if (foundClosingLine && (!boost::regex_match(line, iddRegex::metaDataComment()))) {
+          break;
+        }
+
+        if (!line.empty()) {
+          // if the line is not empty add it to the text
+          // note, text does not include newlines
+          text += line;
+
+          // check if we have found the last field
+          if (boost::regex_match(line, iddRegex::closingField())) {
+            foundClosingLine = true;
+          }
+        }
+      }
+
+      // Submit a lambda object to the pool.
+      // We capture objectName, currentGroup and text by value, to avoid concurrency issues
+      boost::asio::post(pool, [this,  //&tid_gen,
+                               &mtx_, objectName, currentGroup, text]() {
+        //thread_local int tid = ++tid_gen;
+        //std::cout << "Parsing " << objectName << " in thread ID :" << tid << "\n";
+
+        // construct the IddObject using default UserCustom type
+        OptionalIddObject object = IddObject::load(objectName, currentGroup, text);
+
+        // construct a new object and put it in the object vector
+        if (object) {
+          // Protect the insertion into the vector via the mutex
+          boost::lock_guard<boost::mutex> guard(mtx_);
+          this->m_objects.push_back(*object);
+        } else {
+          // LOG_AND_THROW("Unable to construct IddObject from text: " << '\n' << text);
+        }
+      });
     }
 
     // Join the pool

@@ -68,3 +68,7 @@ set(idd_swig_src
   ${CMAKE_CURRENT_BINARY_DIR}/idd/IddFieldEnums.ixx
   idd/Idd.i
 )
+
+SET(idd_benchmark_src
+  idd/benchmark/LoadIdd_Benchmark.cpp
+)
