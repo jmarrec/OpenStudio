@@ -111,7 +111,8 @@ namespace detail {
     //@{
 
     /// parse text from input stream to construct an IddFile_Impl
-    static std::shared_ptr<IddFile_Impl> load(std::istream& is);
+    // TODO: Temp adding an optional bool to mimic a tri-state bool so I can forward to parse, parseNew or parseNewParallel for benchmark
+    static std::shared_ptr<IddFile_Impl> load(std::istream& is, boost::optional<bool> useParallel = boost::none);
 
     /// print
     std::ostream& print(std::ostream& os) const;
