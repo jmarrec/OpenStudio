@@ -181,12 +181,20 @@ namespace detail {
 
   // SERIALIZATION
 
-  std::shared_ptr<IddFile_Impl> IddFile_Impl::load(std::istream& is) {
+  std::shared_ptr<IddFile_Impl> IddFile_Impl::load(std::istream& is, boost::optional<bool> useParallel) {
     std::shared_ptr<IddFile_Impl> result;
     IddFile_Impl iddFileImpl;
 
     try {
-      iddFileImpl.parse(is);
+      if (useParallel.is_initialized()) {
+        if (useParallel.get()) {
+          iddFileImpl.parseNewParallel(is);
+        } else {
+          iddFileImpl.parseNew(is);
+        }
+      } else {
+        iddFileImpl.parse(is);
+      }
     } catch (...) {
       return result;
     }
@@ -410,6 +418,7 @@ namespace detail {
     // read the rest of the file line by line
     // todo, do this by regex
     while (!headerClosed) {
+      getline(is, line);
       ++lineNum;
 
       // remove whitespace
@@ -440,7 +449,7 @@ namespace detail {
         }
 
         // comment only line
-         continue;
+        continue;
       }
 
       if (line.rfind("\\group ") == 0) {
@@ -456,6 +465,9 @@ namespace detail {
       headerClosed = true;
     }
 
+    // set header
+    m_header = header.str();
+
     // Not continuing the previous one, so I can save the check for IDD_BUILD
 
     auto isClosingLine = [](const std::string& line) {
@@ -466,7 +478,7 @@ namespace detail {
 
       // Should start A or N followed by a digit (or several), then should contain a ';'
       auto c = line[0];
-      if ( !((c == 'A') || (c == 'N')) ) {
+      if (!((c == 'A') || (c == 'N'))) {
         return false;
       }
 
@@ -476,22 +488,31 @@ namespace detail {
       }
 
       return line.find(';', 2) != std::string::npos;
-
-    }
+    };
 
     while (getline(is, line)) {
 
       ++lineNum;
 
-     // Throw away everything after the first '!' if any
-     if (auto pos = line.find('!'); pos != std::string::npos) {
+      // Throw away everything after the first '!' if any
+      if (auto pos = line.find('!'); pos != std::string::npos) {
         line = line.substr(0, pos);
-     }
+      }
 
       // remove whitespace
       openstudio::ascii_trim(line);
 
       if (line.empty()) {
+        continue;
+      }
+
+      if (line.rfind("\\group ") == 0) {
+        headerClosed = true;
+
+        // get the group name
+        currentGroup = line.substr(7);
+        openstudio::ascii_trim(currentGroup);
+
         continue;
       }
 
@@ -503,7 +524,7 @@ namespace detail {
 
       // peek at the object name for indexing in map
       if (auto pos = line.find_first_of(",;"); pos != std::string::npos) {
-        objectName = line.substr(0, pos);//
+        objectName = line.substr(0, pos);  //
         openstudio::ascii_trim(objectName);
       } else {
         // can't figure out the object's name
@@ -514,8 +535,8 @@ namespace detail {
       std::string text(line);
 
       // check if the object has no fields
-      if (auto pos = line.find(';'); != std::string::npos) {
-        if (auto pos2 = line.find(',') != std::string::npos) {
+      if (auto pos = line.find(';'); pos != std::string::npos) {
+        if (auto pos2 = line.find(','); pos2 != std::string::npos) {
           if (pos2 > pos) {
             foundClosingLine = true;
           }
@@ -569,14 +590,33 @@ namespace detail {
         LOG_AND_THROW("Unable to construct IddObject from text: " << '\n' << text);
       }
     }
-
-    // set header
-    m_header = header.str();
   }
 
+  void IddFile_Impl::parseNewParallel(std::istream& is) {
 
-  void IddFile_Impl::parseParallel(std::istream& is) {
+    // keep track of line number in the idd
+    int lineNum = 0;
 
+    // number of object in the idd, 1 is first object
+    int objectNum = 0;
+
+    // stream for header
+    std::stringstream header;
+
+    // have we read the entire header yet
+    bool headerClosed = false;
+
+    std::string currentGroup;
+    std::string objectName;
+
+    // fake a comment only object and put it in the object list and object map
+    OptionalIddObject commentOnlyObject =
+      IddObject::load(iddRegex::commentOnlyObjectName(), currentGroup, iddRegex::commentOnlyObjectText(), IddObjectType::CommentOnly);
+    OS_ASSERT(commentOnlyObject);
+    m_objects.push_back(*commentOnlyObject);
+
+    // temp string to read file
+    std::string line;
 
     // this will contain matches to regular expressions
     boost::smatch matches;
@@ -591,13 +631,12 @@ namespace detail {
 
     // read in the version from the first line
     getline(is, line);
-    if (boost::regex_search(line, matches, iddRegex::version())) {
-
-      m_version = std::string(matches[1].first, matches[1].second);
-
+    openstudio::ascii_trim(line);
+    if (line.rfind("!IDD_Version ") == 0) {
+      m_version = line.substr(13);
+      openstudio::ascii_trim(m_version);
       // this line belongs to the header
       header << line << '\n';
-
     } else {
       // idd file must have a version on the first line of input
       LOG_AND_THROW("Idd file does not contain version on first line: '" << line << "'");
@@ -605,7 +644,8 @@ namespace detail {
 
     // read the rest of the file line by line
     // todo, do this by regex
-    while (getline(is, line)) {
+    while (!headerClosed) {
+      getline(is, line);
       ++lineNum;
 
       // remove whitespace
@@ -619,12 +659,16 @@ namespace detail {
         continue;
       }
 
-      // This is useless, we enforce IDD_BUILD being the first line anyways
-      // if (boost::regex_search(line, matches, iddRegex::build())) {
-      // }
+      if (line.rfind("!IDD_BUILD ") == 0) {
+        m_build = line.substr(11);
+        openstudio::ascii_trim(m_build);
+        // this line belongs to the header
+        header << line << '\n';
 
-      // We trimmed the line, and we know the line isn't empty, so just check if the first char is a '!' instead of using a regex
-      // if (boost::regex_match(line, iddRegex::commentOnlyLine())) {
+        continue;
+      }
+
+      // Comment only: we trimmed the string AND we know it's not empty, so just check the first char
       if (line[0] == '!') {
 
         if (!headerClosed) {
@@ -635,24 +679,69 @@ namespace detail {
         continue;
       }
 
-      if (line.rfind("\\group") == 0) {
-        std::string groupName(line.substr(7));
-
-      // if (boost::regex_search(line, matches, iddRegex::group())) {
-      //  std::string groupName(matches[1].first, matches[1].second);
-
+      if (line.rfind("\\group ") == 0) {
         headerClosed = true;
 
         // get the group name
-        openstudio::ascii_trim(groupName);
-
-        // set the current group
-        currentGroup = groupName;
+        currentGroup = line.substr(7);
+        openstudio::ascii_trim(currentGroup);
 
         continue;
       }
 
       headerClosed = true;
+    }
+
+    // set header
+    m_header = header.str();
+
+    // Not continuing the previous one, so I can save the check for IDD_BUILD
+
+    auto isClosingLine = [](const std::string& line) {
+      // check if we have found the last field
+      if (line.size() < 3) {
+        return false;
+      }
+
+      // Should start A or N followed by a digit (or several), then should contain a ';'
+      auto c = line[0];
+      if (!((c == 'A') || (c == 'N'))) {
+        return false;
+      }
+
+      c = line[1];
+      if (c < '0' || c > '9') {
+        return false;
+      }
+
+      return line.find(';', 2) != std::string::npos;
+    };
+
+    while (getline(is, line)) {
+
+      ++lineNum;
+
+      // Throw away everything after the first '!' if any
+      if (auto pos = line.find('!'); pos != std::string::npos) {
+        line = line.substr(0, pos);
+      }
+
+      // remove whitespace
+      openstudio::ascii_trim(line);
+
+      if (line.empty()) {
+        continue;
+      }
+
+      if (line.rfind("\\group ") == 0) {
+        headerClosed = true;
+
+        // get the group name
+        currentGroup = line.substr(7);
+        openstudio::ascii_trim(currentGroup);
+
+        continue;
+      }
 
       //int beginLineNum(lineNum);
       bool foundClosingLine(false);
@@ -661,9 +750,8 @@ namespace detail {
       ++objectNum;
 
       // peek at the object name for indexing in map
-      std::string objectName;
-      if (boost::regex_search(line, matches, iddRegex::line())) {
-        objectName = std::string(matches[1].first, matches[1].second);
+      if (auto pos = line.find_first_of(",;"); pos != std::string::npos) {
+        objectName = line.substr(0, pos);  //
         openstudio::ascii_trim(objectName);
       } else {
         // can't figure out the object's name
@@ -674,12 +762,18 @@ namespace detail {
       std::string text(line);
 
       // check if the object has no fields
-      if (boost::regex_match(line, iddRegex::objectNoFields())) {
-        foundClosingLine = true;
+      if (auto pos = line.find(';'); pos != std::string::npos) {
+        if (auto pos2 = line.find(','); pos2 != std::string::npos) {
+          if (pos2 > pos) {
+            foundClosingLine = true;
+          }
+        } else {
+          foundClosingLine = true;
+        }
       }
 
       // check if the object has fields, and last field on this line
-      if (boost::regex_match(line, iddRegex::closingField())) {
+      if (isClosingLine(line)) {
         foundClosingLine = true;
       }
 
@@ -688,11 +782,16 @@ namespace detail {
       while (getline(is, line)) {
         ++lineNum;
 
+        // Throw away everything after the first '!' if any
+        if (auto pos = line.find('!'); pos != std::string::npos) {
+          line = line.substr(0, pos);
+        }
+
         // remove whitespace
         openstudio::ascii_trim(line);
 
         // found last field and this is not a field comment
-        if (foundClosingLine && (!boost::regex_match(line, iddRegex::metaDataComment()))) {
+        if (foundClosingLine && (line.empty() || (line[0] != '\\'))) {
           break;
         }
 
@@ -702,7 +801,7 @@ namespace detail {
           text += line;
 
           // check if we have found the last field
-          if (boost::regex_match(line, iddRegex::closingField())) {
+          if (isClosingLine(line)) {
             foundClosingLine = true;
           }
         }
@@ -731,9 +830,6 @@ namespace detail {
 
     // Join the pool
     pool.join();
-
-    // set header
-    m_header = header.str();
   }
 
 }  // namespace detail

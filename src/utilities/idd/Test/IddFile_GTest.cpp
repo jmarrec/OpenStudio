@@ -31,6 +31,8 @@
 #include "IddFixture.hpp"
 
 #include "../IddKey.hpp"
+#include "../IddFile.hpp"
+#include "../IddFile_Impl.hpp"
 
 #include "../../core/StringStreamLogSink.hpp"
 #include "../../core/Containers.hpp"
@@ -118,6 +120,144 @@ TEST_F(IddFixture, EpIddFile) {
   }
 
   testIddFile(*loadedIddFile);
+}
+
+// test idd file
+TEST_F(IddFixture, EpIddFile_New) {
+  SCOPED_TRACE("EpIddFile");
+
+  StringStreamLogSink ss;
+  ss.setLogLevel(Debug);
+
+  path iddPath = resourcesPath() / toPath("energyplus/ProposedEnergy+.idd");
+  openstudio::filesystem::ifstream inFile(iddPath);
+  ASSERT_TRUE(inFile ? true : false);
+  auto loadedIddFile = openstudio::detail::IddFile_Impl::load(inFile, false);
+  ASSERT_TRUE(loadedIddFile);
+  inFile.close();
+
+  for (auto iddObject : loadedIddFile->objects()) {
+    for (auto iddField : iddObject.nonextensibleFields()) {
+      iddField.properties();
+    }
+    for (auto iddField : iddObject.extensibleGroup()) {
+      iddField.properties();
+    }
+  }
+
+  EXPECT_EQ(0, ss.logMessages().size());
+  for (auto logMessage : ss.logMessages()) {
+    EXPECT_EQ("", logMessage.logMessage());
+  }
+
+  EXPECT_EQ("9.5.0", loadedIddFile->version());
+  EXPECT_EQ(epIddFile.objects().size(), loadedIddFile->objects().size());
+  if (epIddFile.objects().size() != loadedIddFile->objects().size()) {
+    // get sets of IddObjectType
+    IddObjectTypeSet epIddObjectTypes, loadedIddObjectTypes, diff;
+    for (const IddObject& iddObject : epIddFile.objects()) {
+      EXPECT_TRUE(iddObject.type() != IddObjectType::UserCustom);
+      epIddObjectTypes.insert(iddObject.type());
+    }
+    for (const IddObject& iddObject : loadedIddFile->objects()) {
+      if (iddObject.type() == IddObjectType::UserCustom) {
+        try {
+          IddObjectType iddObjectType(iddObject.name());
+          loadedIddObjectTypes.insert(iddObjectType);
+        } catch (...) {
+          LOG(Debug, "Unable to convert IddObject name '" << iddObject.name() << "' "
+                                                          << "to IddObjectType.");
+        }
+      } else {
+        loadedIddObjectTypes.insert(iddObject.type());
+      }
+    }
+    std::set_difference(epIddObjectTypes.begin(), epIddObjectTypes.end(), loadedIddObjectTypes.begin(), loadedIddObjectTypes.end(),
+                        std::inserter(diff, diff.begin()));
+    // cppcheck-suppress shadowVariable
+    std::stringstream ss;
+    for (const IddObjectType& iddType : diff) {
+      ss << "  " << iddType << '\n';
+    }
+    diff.clear();
+    LOG(Debug, "The following object types are in epIddFile, but are not in loadedIddFile: " << '\n' << ss.str());
+    ss.str("");
+    std::set_difference(loadedIddObjectTypes.begin(), loadedIddObjectTypes.end(), epIddObjectTypes.begin(), epIddObjectTypes.end(),
+                        std::inserter(diff, diff.begin()));
+    for (const IddObjectType& iddType : diff) {
+      ss << "  " << iddType << '\n';
+    }
+    LOG(Debug, "The following object types are in loadedIddFile, but are not in epIddFile: " << '\n' << ss.str());
+  }
+}
+
+// test idd file
+TEST_F(IddFixture, EpIddFile_NewParallel) {
+  SCOPED_TRACE("EpIddFile");
+
+  StringStreamLogSink ss;
+  ss.setLogLevel(Debug);
+
+  path iddPath = resourcesPath() / toPath("energyplus/ProposedEnergy+.idd");
+  openstudio::filesystem::ifstream inFile(iddPath);
+  ASSERT_TRUE(inFile ? true : false);
+  auto loadedIddFile = openstudio::detail::IddFile_Impl::load(inFile, true);
+  ASSERT_TRUE(loadedIddFile);
+  inFile.close();
+
+  for (auto iddObject : loadedIddFile->objects()) {
+    for (auto iddField : iddObject.nonextensibleFields()) {
+      iddField.properties();
+    }
+    for (auto iddField : iddObject.extensibleGroup()) {
+      iddField.properties();
+    }
+  }
+
+  EXPECT_EQ(0, ss.logMessages().size());
+  for (auto logMessage : ss.logMessages()) {
+    EXPECT_EQ("", logMessage.logMessage());
+  }
+
+  EXPECT_EQ("9.5.0", loadedIddFile->version());
+  EXPECT_EQ(epIddFile.objects().size(), loadedIddFile->objects().size());
+  if (epIddFile.objects().size() != loadedIddFile->objects().size()) {
+    // get sets of IddObjectType
+    IddObjectTypeSet epIddObjectTypes, loadedIddObjectTypes, diff;
+    for (const IddObject& iddObject : epIddFile.objects()) {
+      EXPECT_TRUE(iddObject.type() != IddObjectType::UserCustom);
+      epIddObjectTypes.insert(iddObject.type());
+    }
+    for (const IddObject& iddObject : loadedIddFile->objects()) {
+      if (iddObject.type() == IddObjectType::UserCustom) {
+        try {
+          IddObjectType iddObjectType(iddObject.name());
+          loadedIddObjectTypes.insert(iddObjectType);
+        } catch (...) {
+          LOG(Debug, "Unable to convert IddObject name '" << iddObject.name() << "' "
+                                                          << "to IddObjectType.");
+        }
+      } else {
+        loadedIddObjectTypes.insert(iddObject.type());
+      }
+    }
+    std::set_difference(epIddObjectTypes.begin(), epIddObjectTypes.end(), loadedIddObjectTypes.begin(), loadedIddObjectTypes.end(),
+                        std::inserter(diff, diff.begin()));
+    // cppcheck-suppress shadowVariable
+    std::stringstream ss;
+    for (const IddObjectType& iddType : diff) {
+      ss << "  " << iddType << '\n';
+    }
+    diff.clear();
+    LOG(Debug, "The following object types are in epIddFile, but are not in loadedIddFile: " << '\n' << ss.str());
+    ss.str("");
+    std::set_difference(loadedIddObjectTypes.begin(), loadedIddObjectTypes.end(), epIddObjectTypes.begin(), epIddObjectTypes.end(),
+                        std::inserter(diff, diff.begin()));
+    for (const IddObjectType& iddType : diff) {
+      ss << "  " << iddType << '\n';
+    }
+    LOG(Debug, "The following object types are in loadedIddFile, but are not in epIddFile: " << '\n' << ss.str());
+  }
 }
 
 // test idd file
