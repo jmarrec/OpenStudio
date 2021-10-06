@@ -31,7 +31,8 @@
 
 #include "../../model/Model.hpp"
 #include "../../model/DaylightingControl.hpp"
-#include "../../model/DaylightingControl_Impl.hpp"
+#include "../../model/Space.hpp"
+#include "../../model/ThermalZone.hpp"
 
 #include "../../utilities/idd/IddEnums.hpp"
 #include <utilities/idd/IddFactory.hxx>
@@ -46,6 +47,46 @@ namespace energyplus {
 
   boost::optional<IdfObject> ForwardTranslator::translateDaylightingControl(model::DaylightingControl& modelObject) {
     // real work is done in translateThermalZone
+    // TODO: move the 'real' work here
+    // TODO: make transateSpace call this one
+    // In this one, do like SpaceLoad, figure out if we write to a Space or Zone
+    // TODO: should we deprecate ThermalZone::setPrimary/SecondaryDaylightingControl. E+ doesn't seem to have any limitations on the number of
+    // Reference Points. The thing is that the
+    //
+
+    boost::optional<Space> space_ = modelObject.space();
+    if (!space_) {
+      LOG(Warn, modelObject.briefDescription() << " isn't assigned to a Space, it will not be translated");
+      return boost::none;
+    }
+
+    boost::optional<ThermalZone> thermalZone_ = space_->thermalZone();
+    boost::optional<Schedule> availabilitySchedule;
+
+    if (thermalZone_) {
+      availabilitySchedule = thermalZone_->daylightingControlsAvailabilitySchedule();
+    } else if (m_excludeSpaceTranslation) {
+      LOG(Warn, modelObject.briefDescription() << " is assigned to a Space that has no thermal zone. It will not be translated");
+      OS_ASSERT(false);  // THis shouldn't happen, translateSpace is responsible to trigger this one
+      return boost::none;
+    }
+
+    OptionalIdfObject relatedIdfObject;
+
+    if (boost::optional<Space> space = modelObject.space()) {
+      if (m_excludeSpaceTranslation) {
+        if (auto thermalZone_ = space->thermalZone()) {
+          relatedIdfObject = translateAndMapModelObject(thermalZone_.get());
+        } else {
+          OS_ASSERT(false);  // This shouldn't happen, since we removed all orphaned spaces earlier in the FT
+        }
+      } else {
+        relatedIdfObject = translateAndMapModelObject(*space);
+      }
+    }
+
+    OS_ASSERT(relatedIdfObject);
+
     return boost::none;
   }
 
