@@ -140,25 +140,27 @@ TEST_F(IddFixture, EpIddFile_New) {
   ASSERT_TRUE(loadedIddFile);
   inFile.close();
 
-  for (auto iddObject : loadedIddFile->objects()) {
-    for (auto iddField : iddObject.nonextensibleFields()) {
+  for (const auto& iddObject : loadedIddFile->objects()) {
+    for (const auto& iddField : iddObject.nonextensibleFields()) {
       iddField.properties();
     }
-    for (auto iddField : iddObject.extensibleGroup()) {
+    for (const auto& iddField : iddObject.extensibleGroup()) {
       iddField.properties();
     }
   }
 
   EXPECT_EQ(0, ss.logMessages().size());
-  for (auto logMessage : ss.logMessages()) {
+  for (const auto& logMessage : ss.logMessages()) {
     EXPECT_EQ("", logMessage.logMessage());
   }
 
-  EXPECT_EQ("9.5.0", loadedIddFile->version());
+  EXPECT_EQ("22.2.0", loadedIddFile->version());
   EXPECT_EQ(epIddFile.objects().size(), loadedIddFile->objects().size());
   if (epIddFile.objects().size() != loadedIddFile->objects().size()) {
     // get sets of IddObjectType
-    IddObjectTypeSet epIddObjectTypes, loadedIddObjectTypes, diff;
+    IddObjectTypeSet epIddObjectTypes;
+    IddObjectTypeSet loadedIddObjectTypes;
+    IddObjectTypeSet diff;
     for (const IddObject& iddObject : epIddFile.objects()) {
       EXPECT_TRUE(iddObject.type() != IddObjectType::UserCustom);
       epIddObjectTypes.insert(iddObject.type());
@@ -209,25 +211,27 @@ TEST_F(IddFixture, EpIddFile_NewParallel) {
   ASSERT_TRUE(loadedIddFile);
   inFile.close();
 
-  for (auto iddObject : loadedIddFile->objects()) {
-    for (auto iddField : iddObject.nonextensibleFields()) {
+  for (const auto& iddObject : loadedIddFile->objects()) {
+    for (const auto& iddField : iddObject.nonextensibleFields()) {
       iddField.properties();
     }
-    for (auto iddField : iddObject.extensibleGroup()) {
+    for (const auto& iddField : iddObject.extensibleGroup()) {
       iddField.properties();
     }
   }
 
   EXPECT_EQ(0, ss.logMessages().size());
-  for (auto logMessage : ss.logMessages()) {
+  for (const auto& logMessage : ss.logMessages()) {
     EXPECT_EQ("", logMessage.logMessage());
   }
 
-  EXPECT_EQ("9.5.0", loadedIddFile->version());
+  EXPECT_EQ("22.2.0", loadedIddFile->version());
   EXPECT_EQ(epIddFile.objects().size(), loadedIddFile->objects().size());
   if (epIddFile.objects().size() != loadedIddFile->objects().size()) {
     // get sets of IddObjectType
-    IddObjectTypeSet epIddObjectTypes, loadedIddObjectTypes, diff;
+    IddObjectTypeSet epIddObjectTypes;
+    IddObjectTypeSet loadedIddObjectTypes;
+    IddObjectTypeSet diff;
     for (const IddObject& iddObject : epIddFile.objects()) {
       EXPECT_TRUE(iddObject.type() != IddObjectType::UserCustom);
       epIddObjectTypes.insert(iddObject.type());
