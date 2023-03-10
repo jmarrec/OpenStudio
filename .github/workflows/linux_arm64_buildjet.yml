@@ -1,0 +1,128 @@
+name: Linux Buildjet arm64
+
+on:
+  push:
+    branches: [ arm64 ]
+    tags:
+      - '*'
+
+env:
+  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  BUILD_TYPE: Release
+  Python_REQUIRED_VERSION: "3.8.12"
+
+jobs:
+  linux_release:
+    runs-on: buildjet-32vcpu-ubuntu-2204-arm
+    permissions:
+      # Needed permission to upload the release asset
+      contents: write
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
+      id: setup-python
+      # uses: actions/setup-python@v4
+      # with:
+      #   python-version: ${{ env.Python_REQUIRED_VERSION }}
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y build-essential libssl-dev zlib1g-dev libbz2-dev libreadline-dev libsqlite3-dev curl \
+          libncursesw5-dev xz-utils tk-dev libxml2-dev libxmlsec1-dev libffi-dev liblzma-dev
+
+        git clone https://github.com/pyenv/pyenv.git ~/.pyenv
+        export PATH=$PATH:~/.pyenv/bin
+        eval "$(pyenv init -)"
+        PYTHON_CONFIGURE_OPTS="--enable-shared" pyenv install ${{ env.Python_REQUIRED_VERSION }}
+        echo "python-version=${{ env.Python_REQUIRED_VERSION }}" >> $GITHUB_OUTPUT
+        echo "${HOME}/.pyenv/bin" >> $GITHUB_PATH
+        echo "${HOME}/.pyenv/versions/$Python_REQUIRED_VERSION/bin" >> $GITHUB_PATH
+
+    - name: Install RVM
+      run: |
+        apt-add-repository -y ppa:rael-gc/rvm
+        apt-get update
+        apt-get install rvm
+
+    - name: Setup ruby
+      run: |
+        wget https://www.openssl.org/source/old/1.1.1/openssl-1.1.1o.tar.gz
+        tar xfz openssl-1.1.1o.tar.gz && cd openssl-1.1.1o
+        ./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl '-Wl,-rpath,$(LIBRPATH)'
+        make -j 8
+        sudo make install
+
+        rvm install 2.7.2 --with-openssl-dir=/usr/local/ssl/ -- --enable-static
+        rvm use --default 2.7.2
+
+    - name: Install System dependencies and LaTeX
+      shell: bash
+      run: |
+        set -x
+        echo "Using Apt to install dependencies"
+        sudo apt-get update
+        sudo apt-get libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev
+
+
+    - name: Install Python dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install conan==1.59.0 setuptools wheel twine requests packaging
+        conan --version
+        echo "Enabling conan revisions and setting parallel_download"
+        conan config set general.revisions_enabled=True
+        conan config set general.parallel_download=8
+        conan remote add --insert 0 --force nrel https://conan.openstudio.net/artifactory/api/conan/openstudio
+
+
+    - name: Create Build Directory
+      run: |
+        set -x
+        python --version
+        ruby --version
+        cmake -E make_directory ./build/
+
+    - name: Configure CMake
+      working-directory: ./build
+      shell: bash
+      run: |
+        export C=/usr/bin/gcc-11
+        export CXX=/usr/bin/g++-11
+
+        cmake -G Ninja  -DCMAKE_BUILD_TYPE:STRING=Release \
+              -DBUILD_TESTING:BOOL=OFF  \
+              -DBUILD_PYTHON_BINDINGS:BOOL=ON \
+              -DBUILD_PYTHON_PIP_PACKAGE:BOOL=ON \
+              -DBUILD_PACKAGE:BOOL=ON -DCPACK_BINARY_IFW:BOOL=OFF -DCPACK_BINARY_STGZ:BOOL=OFF -DCPACK_BINARY_TGZ:BOOL=ON \
+              -DPYTHON_VERSION:STRING=$Python_REQUIRED_VERSION \
+              -DPython_ROOT_DIR:STRING=/root/.pyenv/versions/$Python_REQUIRED_VERSION \
+              -DPYTHON_EXECUTABLE:FILEPATH=/root/.pyenv/versions/$Python_REQUIRED_VERSION/bin/python3.8 \
+              -DPYTHON_INCLUDE_DIR:PATH=/root/.pyenv/versions/$Python_REQUIRED_VERSION/include/python3.8 \
+              -DPYTHON_LIBRARY:FILEPATH=/root/.pyenv/versions/$Python_REQUIRED_VERSION/lib/libpython3.8.so \
+              -DBUILD_RUBY_BINDINGS:BOOL=ON -DBUILD_CLI:BOOL=ON \
+              -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON \
+              -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc-11 \
+              ../
+
+    - name: Build Package
+      working-directory: ./build
+      shell: bash
+      run: cmake --build . --target package -j $(nproc)
+
+    - name: Upload Tarball as artifact
+      if: ${{ always() }}
+      uses: actions/upload-artifact@v3
+      with:
+          name: OpenStudio-${{ github.sha }}-Ubuntu-22.04-arm64.tar.gz
+          path: build/OpenStudio-*-arm64.tar.gz
+
+    - name: Upload Tarball to release
+      if: contains(github.ref, 'refs/tags')
+      uses: svenstaro/upload-release-action@v2
+      with:
+        repo_token: ${{ secrets.GITHUB_TOKEN }}
+        file: build/OpenStudio-*-arm64.tar.gz
+        tag: ${{ github.ref }}
+        overwrite: true
+        file_glob: true
