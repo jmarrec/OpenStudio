@@ -39,26 +39,26 @@ jobs:
         echo "${HOME}/.pyenv/bin" >> $GITHUB_PATH
         echo "${HOME}/.pyenv/versions/$Python_REQUIRED_VERSION/bin" >> $GITHUB_PATH
 
-    - name: Install RVM
-      run: |
-        sudo apt-add-repository -y ppa:rael-gc/rvm
-        sudo apt-get update -qq
-        sudo apt-get install -y rvm
-        sudo usermod -a -G rvm $USER
-        echo "/usr/share/rvm/bin" >> $GITHUB_PATH
-
-    - name: Setup ruby
-      run: |
-        wget https://www.openssl.org/source/old/1.1.1/openssl-1.1.1o.tar.gz
-        tar xfz openssl-1.1.1o.tar.gz && cd openssl-1.1.1o
-        ./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl '-Wl,-rpath,$(LIBRPATH)'
-        make -j 8
-        sudo make install
-
-        source /usr/share/rvm/bin/rvm
-        rvm install 2.7.2 --with-openssl-dir=/usr/local/ssl/ -- --enable-static
-        rvm use --default 2.7.2
-        echo "/usr/share/rvm/rubies/ruby-2.7.2/bin/" >> $GITHUB_PATH
+#    - name: Install RVM
+#      run: |
+#        sudo apt-add-repository -y ppa:rael-gc/rvm
+#        sudo apt-get update -qq
+#        sudo apt-get install -y rvm
+#        sudo usermod -a -G rvm $USER
+#        echo "/usr/share/rvm/bin" >> $GITHUB_PATH
+#
+#    - name: Setup ruby
+#      run: |
+#        wget https://www.openssl.org/source/old/1.1.1/openssl-1.1.1o.tar.gz
+#        tar xfz openssl-1.1.1o.tar.gz && cd openssl-1.1.1o
+#        ./config --prefix=/usr/local/ssl --openssldir=/usr/local/ssl '-Wl,-rpath,$(LIBRPATH)'
+#        make -j 8
+#        sudo make install --quiet
+#
+#        source /usr/share/rvm/bin/rvm
+#        sudo rvm install 2.7.2 --with-openssl-dir=/usr/local/ssl/ -- --enable-static
+#        rvm use --default 2.7.2
+#        echo "/usr/share/rvm/rubies/ruby-2.7.2/bin/" >> $GITHUB_PATH
 
     - name: Install System dependencies
       shell: bash
