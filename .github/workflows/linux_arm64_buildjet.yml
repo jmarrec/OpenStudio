@@ -28,7 +28,7 @@ jobs:
       run: |
         set -x
         echo "Using Apt to install dependencies"
-        sudo apt-get update
+        sudo apt-get update -qq
         sudo apt-get install -y libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev
 
         # sudo add-apt-repository ppa:ubuntu-toolchain-r/test
@@ -84,6 +84,8 @@ jobs:
         pip install conan==1.59.0 setuptools wheel twine requests packaging
         conan --version
         echo "Enabling conan revisions and setting parallel_download"
+        conan profile new --detect default
+        conan profile update settings.compiler.libcxx=libstdc++11 default
         conan config set general.revisions_enabled=True
         conan config set general.parallel_download=8
         conan remote add --insert 0 --force nrel https://conan.openstudio.net/artifactory/api/conan/openstudio
