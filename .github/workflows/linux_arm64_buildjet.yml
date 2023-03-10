@@ -31,6 +31,11 @@ jobs:
         sudo apt-get update
         sudo apt-get install -y libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev
 
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo apt update -qq
+        sudo apt install gcc-10 g++-10 # gfortran-10
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 60 --slave /usr/bin/g++ g++ /usr/bin/g++-10 --slave /usr/bin/gcov gcov /usr/bin/gcov-10 # --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-10
+
     - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
       id: setup-python
       # uses: actions/setup-python@v4
@@ -110,6 +115,7 @@ jobs:
               -DPYTHON_LIBRARY:FILEPATH=/root/.pyenv/versions/$Python_REQUIRED_VERSION/lib/libpython3.8.so \
               -DBUILD_RUBY_BINDINGS:BOOL=ON -DBUILD_CLI:BOOL=ON \
               -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON \
+              -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc-10 \
               ../
 
     - name: Build Package
