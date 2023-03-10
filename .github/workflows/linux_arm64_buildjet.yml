@@ -41,9 +41,9 @@ jobs:
 
     - name: Install RVM
       run: |
-        apt-add-repository -y ppa:rael-gc/rvm
-        apt-get update
-        apt-get install rvm
+        sudo apt-add-repository -y ppa:rael-gc/rvm
+        sudo apt-get update -qq
+        sudo apt-get install -y rvm
 
     - name: Setup ruby
       run: |
