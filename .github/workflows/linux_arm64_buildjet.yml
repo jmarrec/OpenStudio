@@ -10,6 +10,8 @@ env:
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
   BUILD_TYPE: Release
   Python_REQUIRED_VERSION: "3.8.12"
+  C: "/usr/bin/gcc-10"
+  CXX: "/usr/bin/g++-10"
 
 jobs:
   linux_release:
@@ -20,6 +22,14 @@ jobs:
 
     steps:
     - uses: actions/checkout@v3
+
+    - name: Install System dependencies
+      shell: bash
+      run: |
+        set -x
+        echo "Using Apt to install dependencies"
+        sudo apt-get update
+        sudo apt-get install -y libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev
 
     - name: Set up Python ${{ env.Python_REQUIRED_VERSION }}
       id: setup-python
@@ -60,13 +70,7 @@ jobs:
 #        rvm use --default 2.7.2
 #        echo "/usr/share/rvm/rubies/ruby-2.7.2/bin/" >> $GITHUB_PATH
 
-    - name: Install System dependencies
-      shell: bash
-      run: |
-        set -x
-        echo "Using Apt to install dependencies"
-        sudo apt-get update
-        sudo apt-get install -y libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev
+
 
 
     - name: Install Python dependencies
@@ -106,7 +110,6 @@ jobs:
               -DPYTHON_LIBRARY:FILEPATH=/root/.pyenv/versions/$Python_REQUIRED_VERSION/lib/libpython3.8.so \
               -DBUILD_RUBY_BINDINGS:BOOL=ON -DBUILD_CLI:BOOL=ON \
               -DCMAKE_EXPORT_COMPILE_COMMANDS:BOOL=ON \
-              -DCMAKE_C_COMPILER:FILEPATH=/usr/bin/gcc-11 \
               ../
 
     - name: Build Package
