@@ -95,7 +95,7 @@ jobs:
         export CXX=/usr/bin/g++-11
 
         cmake -G Ninja  -DCMAKE_BUILD_TYPE:STRING=Release \
-              -DBUILD_TESTING:BOOL=OFF  \
+              -DBUILD_TESTING:BOOL=ON  \
               -DBUILD_PYTHON_BINDINGS:BOOL=ON \
               -DBUILD_PYTHON_PIP_PACKAGE:BOOL=ON \
               -DBUILD_PACKAGE:BOOL=ON -DCPACK_BINARY_IFW:BOOL=OFF -DCPACK_BINARY_STGZ:BOOL=OFF -DCPACK_BINARY_TGZ:BOOL=ON \
@@ -113,6 +113,17 @@ jobs:
       working-directory: ./build
       shell: bash
       run: cmake --build . --target package -j $(nproc)
+
+    - name: Ctest
+      working-directory: ./build
+      shell: bash
+      run: |
+        ctest -j $(nproc) || true
+
+    - name: Rerun failed tests
+      shell: bash
+      run: |
+        ctest -j $(nproc) --rerun-failed --output-on-failure
 
     - name: Upload Tarball as artifact
       if: ${{ always() }}
