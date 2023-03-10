@@ -66,7 +66,7 @@ jobs:
         set -x
         echo "Using Apt to install dependencies"
         sudo apt-get update
-        sudo apt-get libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev
+        sudo apt-get install -y libxkbcommon-x11-0 xorg-dev libgl1-mesa-dev
 
 
     - name: Install Python dependencies
