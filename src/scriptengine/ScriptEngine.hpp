@@ -76,7 +76,7 @@ class ScriptEngine
   // Ideally this would return a openstudio::measure::OSMeasure* or a shared_ptr<openstudio::measure::OSMeasure> but this poses memory management
   // issue for the underlying ScriptObject (and VALUE or PyObject), so just return the ScriptObject
   virtual ScriptObject loadMeasure(const openstudio::path& measureScriptPath, std::string_view className) = 0;
-
+  virtual void unloadMeasure(const openstudio::path& measureScriptPath, std::string_view className){};
   virtual int numberOfArguments(ScriptObject& methodObject, std::string_view methodName) = 0;
 
   template <typename T>

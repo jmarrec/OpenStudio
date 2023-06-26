@@ -372,6 +372,7 @@ boost::optional<BCLMeasure> MeasureManager::getMeasure(const openstudio::path& m
       try {
         measureInfoBindingObject = rubyEngine->eval("OpenStudio::Measure::RubyMeasureInfoBinding.new()");
       } catch (const RubyException& e) {
+        rubyEngine->exec("Object.const_get(:OpenStudio).const_get(:Measure).send(:remove_const, :RubyMeasureInfoBinding)");
         auto msg = fmt::format("Failed to instantiate a RubyMeasureInfoBinding: {}\nlocation={}", e.what(), e.location());
         fmt::print(stderr, "{}\n", msg);
         LOG_AND_THROW(msg);
@@ -379,6 +380,7 @@ boost::optional<BCLMeasure> MeasureManager::getMeasure(const openstudio::path& m
       auto* measureInfoBindingPtr = rubyEngine->getAs<openstudio::measure::MeasureInfoBinding*>(measureInfoBindingObject);
       measureInfoBindingPtr->setMeasureInfo(info);
       const bool result = measureInfoBindingPtr->renderFile(readmeInPath.generic_string());
+      rubyEngine->exec("Object.const_get(:OpenStudio).const_get(:Measure).send(:remove_const, :RubyMeasureInfoBinding)");
       if (result) {
         // check for file updates again
         file_updates = measure.checkForUpdatesFiles();
@@ -555,7 +557,8 @@ end
   }
 
   if (measureLanguage == MeasureLanguage::Ruby) {
-    rubyEngine->exec(fmt::format("Object.send(:remove_const, :{})", className));
+    rubyEngine->unloadMeasure(*scriptPath_, className);
+    // rubyEngine->exec(fmt::format("Object.send(:remove_const, :{})", className));
   }
 
   openstudio::measure::OSMeasureInfo info(measureType, className, name, description, taxonomy, modelerDescription, arguments, outputs);

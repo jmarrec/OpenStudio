@@ -36,6 +36,7 @@ class RubyEngine final : public ScriptEngine
   virtual std::string inferMeasureClassName(const openstudio::path& measureScriptPath) override;
 
   virtual ScriptObject loadMeasure(const openstudio::path& measureScriptPath, std::string_view className) override;
+  virtual void unloadMeasure(const openstudio::path& measureScriptPath, std::string_view className) override;
 
   virtual int numberOfArguments(ScriptObject& methodObject, std::string_view methodName) override;
 

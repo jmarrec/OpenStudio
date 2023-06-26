@@ -121,53 +121,79 @@ void* RubyEngine::getAs_impl(ScriptObject& obj, const std::type_info& ti) {
 
 std::string RubyEngine::inferMeasureClassName(const openstudio::path& measureScriptPath) {
 
-  auto inferClassNameCmd = fmt::format(R"ruby(
-ObjectSpace.garbage_collect
-ObjectSpace.garbage_collect
-# Measure should be at root level (not inside a module) so we can just get constants
-measurePath = '{}'
-prev = Object.constants
-puts "prev = #{{prev}}"
-load measurePath # need load in case have seen this script before
-just_defined = Object.constants - prev
-puts "just_defined = #{{just_defined}}"
-just_defined.select!{{|c| Object.const_get(c).ancestors.include?(OpenStudio::Measure::OSMeasure)}}
-puts "just_defined, filtered = #{{just_defined}}"
+  int argc = 0;
+  VALUE oriConstants = rb_mod_constants(argc, nullptr, rb_cObject);
+  long n = RARRAY_LEN(oriConstants);
+  fmt::print("n={}\n", n);
 
-if just_defined.empty?
-  raise "Unable to extract OpenStudio::Measure::OSMeasure object from " +
-       measurePath + ". The script should contain a class that derives " +
-      "from OpenStudio::Measure::OSMeasure and should close with a line stating " +
-      "the class name followed by .new.registerWithApplication."
-end
-if just_defined.size > 1
-  raise "Found more than one OSMeasure at #{{measurePath}}: #{{just_defined}}"
-end
-c = just_defined[0]
-class_info = Object.const_get(c)
-$measure_name = class_info.to_s
+  /* If the optional _wrap_
+   *  parameter is +true+, the loaded script will be executed
+   *  under an anonymous module, protecting the calling program's global
+   *  namespace. In no circumstance will any local variables in the loaded
+   *  file be propagated to the loading environment.*/
+  int wrap = 0;
+  // At ruby 3.x we  could use a specific wrap module...
+  // VALUE wrap_module = rb_define_module("throwaway");
+  VALUE measurePath = rb_str_new2(measureScriptPath.generic_string().c_str());
+  int loadError = 0;
+  rb_load_protect(measurePath, wrap, &loadError);
+  if (loadError) {
+    fmt::print(stderr, "Failed to load\n");
+    VALUE errinfo = rb_errinfo();
+    VALUE exception_class = rb_obj_class(errinfo);
+    VALUE classNameValue = rb_class_name(exception_class);
+    std::string className(StringValuePtr(classNameValue));
 
-# Undef what we loaded
-just_defined.each {{|x| Object.send(:remove_const, x) }}
-ObjectSpace.garbage_collect
-ObjectSpace.garbage_collect
-)ruby",
-                                       measureScriptPath.generic_string());
+    VALUE errstr = rb_obj_as_string(errinfo);
+    std::string errMessage(StringValuePtr(errstr));
 
-  std::string className;
-
-  try {
-    exec(inferClassNameCmd);
-    ScriptObject measureClassNameObject = eval("$measure_name");
-    // measureClassNameObject = rubyEngine->eval(fmt::format("{}.new()", className));
-    // ScriptObject measureClassNameObject = rubyEngine->eval(inferClassName);
-    className = *getAs<std::string*>(measureClassNameObject);
-  } catch (const RubyException& e) {
-    auto msg = fmt::format("Failed to infer measure name from {}: {}\nlocation={}", measureScriptPath.generic_string(), e.what(), e.location());
-    fmt::print(stderr, "{}\n", msg);
+    std::string totalErr = className + ": " + errMessage;
+    fmt::print(stderr, "totalErr={}\n", totalErr);
+    return "";
   }
 
+  // OF COURSE ruby has an rb_ary_diff method, which is not exposed in the public header, because why not?
+  VALUE newConstants = rb_mod_constants(argc, nullptr, rb_cObject);
+  long n2 = RARRAY_LEN(newConstants);
+  fmt::print("n={}, n2={}\n", n, n2);
+
+  VALUE* elements = RARRAY_PTR(oriConstants);
+  for (long i = 0; i < n; ++i) {
+    VALUE elt = elements[i];
+    if (rb_ary_includes(newConstants, elt)) {
+      rb_ary_delete(newConstants, elt);
+    }
+  }
+
+  n = RARRAY_LEN(newConstants);
+  elements = RARRAY_PTR(newConstants);
+  if (n == 0) {
+    fmt::print(stderr, "Failed to infer measure name from {}\n", measureScriptPath.generic_string());
+    return "";
+  } else if (n > 1) {
+    fmt::print(stderr, "Found more than one OSMeasure at {}: {}\n", measureScriptPath.generic_string(), n);
+    return "";
+  }
+
+  VALUE elt = elements[0];
+  ID id = SYM2ID(elt);
+  std::string className = rb_id2name(id);
+  fmt::print("className={}\n", className);
+
+  unloadMeasure(measureScriptPath, className);
+
   return className;
+}
+
+void RubyEngine::unloadMeasure(const openstudio::path& measureScriptPath, std::string_view className) {
+  VALUE oriConstants = rb_mod_constants(argc, nullptr, rb_cObject);
+  long before = RARRAY_LEN(oriConstants);
+  ID id = rb_intern(className.data());
+  [[maybe_unused]] VALUE x = rb_const_remove(rb_cObject, id);
+  oriConstants = rb_mod_constants(argc, nullptr, rb_cObject);
+  long after = RARRAY_LEN(oriConstants);
+  fmt::print("n, before={}, after={}\n", before, after);
+  x = Qnil;
 }
 
 // Ideally this would return a openstudio::measure::OSMeasure* or a shared_ptr<openstudio::measure::OSMeasure> but this poses memory management
