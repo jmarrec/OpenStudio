@@ -119,6 +119,47 @@ void* RubyEngine::getAs_impl(ScriptObject& obj, const std::type_info& ti) {
   return return_value;
 }
 
+void filterAryKeepOnlyMeasures(VALUE constants) {
+  static const VALUE openstudio_measure_osmeasure = []() {
+    const ID openstudio_id = rb_intern("OpenStudio");
+    const VALUE openstudio_module = rb_const_get(rb_cObject, openstudio_id);
+    const ID measure_id = rb_intern("Measure");
+    const VALUE openstudio_measure_module = rb_const_get(openstudio_module, measure_id);
+    const ID osmeasure_id = rb_intern("OSMeasure");
+    return rb_const_get(openstudio_measure_module, osmeasure_id);
+  }();
+  // ID openstudio_id = rb_intern("OpenStudio");
+  // VALUE openstudio_module = rb_const_get(rb_cObject, openstudio_id);
+  // ID measure_id = rb_intern("Measure");
+  // VALUE openstudio_measure_module = rb_const_get(openstudio_module, measure_id);
+  // ID osmeasure_id = rb_intern("OSMeasure");
+  // VALUE openstudio_measure_osmeasure = rb_const_get(openstudio_measure_module, osmeasure_id);
+
+  const long n = RARRAY_LEN(constants);
+  VALUE* elements = RARRAY_PTR(constants);
+  for (long i = n - 1; i >= 0; --i) {
+    VALUE elt = elements[i];
+    ID id = SYM2ID(elt);
+    VALUE mod = rb_const_get(rb_cObject, id);
+    if (!RB_TYPE_P(mod, T_CLASS)) {
+      rb_ary_delete_at(constants, i);
+      continue;
+    }
+    // std::string className = rb_id2name(id);
+    // VALUE ancestors = rb_mod_ancestors(mod);
+    // VALUE ancestorsJoin = rb_ary_join(ancestors, rb_str_new2("\n"));
+    // std::string ancestorsLines = StringValuePtr(ancestorsJoin);
+    // bool contains = rb_ary_includes(ancestors, openstudio_measure_osmeasure);
+    // fmt::print("ancestors={}, contains={}\n", RARRAY_LEN(ancestors), contains);
+    if (!RTEST(rb_class_inherited_p(mod, openstudio_measure_osmeasure))) {
+      // fmt::print("'{}' DOES NOT inherit OSMeasure\n{}\n", className, ancestorsLines);
+      rb_ary_delete_at(constants, i);
+    } else {
+      // fmt::print("'{}' inherits OSMeasure\n{}\n", className, ancestorsLines);
+    }
+  }
+}
+
 std::string RubyEngine::inferMeasureClassName(const openstudio::path& measureScriptPath) {
 
   int argc = 0;
@@ -156,6 +197,10 @@ std::string RubyEngine::inferMeasureClassName(const openstudio::path& measureScr
   VALUE newConstants = rb_mod_constants(argc, nullptr, rb_cObject);
   long n2 = RARRAY_LEN(newConstants);
   fmt::print("n={}, n2={}\n", n, n2);
+
+  filterAryKeepOnlyMeasures(newConstants);
+  n2 = RARRAY_LEN(newConstants);
+  fmt::print("n2, filtered={}\n", n2);
 
   VALUE* elements = RARRAY_PTR(oriConstants);
   for (long i = 0; i < n; ++i) {
