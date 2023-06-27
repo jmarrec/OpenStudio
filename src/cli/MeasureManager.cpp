@@ -546,6 +546,7 @@ end
     } else {
       throw std::runtime_error("Unknown");
     }
+    delete osMeasurePtr;
   } catch (const std::exception& e) {
     auto msg = fmt::format("Failed to query information from measure '{}' from '{}': {}\n", className, scriptPath_->generic_string(), e.what());
     fmt::print(stderr, "{}\n", msg);

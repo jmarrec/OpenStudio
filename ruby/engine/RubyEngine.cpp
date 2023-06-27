@@ -224,6 +224,8 @@ std::string RubyEngine::inferMeasureClassName(const openstudio::path& measureScr
   ID id = SYM2ID(elt);
   std::string className = rb_id2name(id);
   fmt::print("className={}\n", className);
+  rb_ary_free(oriConstants);
+  rb_ary_free(newConstants);
 
   unloadMeasure(measureScriptPath, className);
 
@@ -233,10 +235,12 @@ std::string RubyEngine::inferMeasureClassName(const openstudio::path& measureScr
 void RubyEngine::unloadMeasure(const openstudio::path& measureScriptPath, std::string_view className) {
   VALUE oriConstants = rb_mod_constants(argc, nullptr, rb_cObject);
   long before = RARRAY_LEN(oriConstants);
+  rb_ary_free(oriConstants);
   ID id = rb_intern(className.data());
   [[maybe_unused]] VALUE x = rb_const_remove(rb_cObject, id);
   oriConstants = rb_mod_constants(argc, nullptr, rb_cObject);
   long after = RARRAY_LEN(oriConstants);
+  rb_ary_free(oriConstants);
   fmt::print("n, before={}, after={}\n", before, after);
   x = Qnil;
 }
