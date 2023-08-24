@@ -1,0 +1,134 @@
+name: Vendor conan dependencies
+
+# Goal: keep up to date with the Github Actions runners.
+# Calls CMake configure on the repo, which will install all conan packages and build the missing ones
+# Then reupload any new package that was built on it to the NREL's remote.
+
+on:
+  push:
+    branches: [ master, develop, conan_vendor ]
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - 'v*' # Push events to matching v*, i.e. v1.0, v20.15.10
+  pull_request:
+    branches: [ master ]
+
+env:
+  BUILD_TYPE: Release
+
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      # fail-fast: Default is true, switch to false to allow one platform to fail and still run others
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04, ubuntu-22.04, windows-2022, macos-11, macos-12, macos-13]
+        include:
+        - os: macos-11
+          MACOSX_DEPLOYMENT_TARGET: 10.15
+          SDKROOT: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+        - os: macos-12
+          MACOSX_DEPLOYMENT_TARGET: 10.15
+          SDKROOT: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+        - os: macos-13
+          MACOSX_DEPLOYMENT_TARGET: 12.1
+          SDKROOT: /Applications/Xcode.app/Contents/Developer/Platforms/MacOSX.platform/Developer/SDKs/MacOSX.sdk
+        # - os: ubuntu-20.04
+        # - os: ubuntu-22.04
+        # - os: windows-2022
+
+
+    steps:
+    - uses: actions/checkout@v3
+      # If you need to rebuild for a specific branch **after** you fixed the workflow...
+      # with:
+      #   ref: master
+
+    - uses: actions/setup-python@v4
+      with:
+        python-version: '3.8.x'
+
+    - name: Install conan
+      run: |
+        python --version
+        pip install conan==1.60.2
+        conan --version
+        echo "Enabling conan revisions and setting parallel_download"
+        conan config set general.revisions_enabled=True
+        conan config set general.parallel_download=8
+        conan remote add --insert 0 --force nrel https://conan.openstudio.net/artifactory/api/conan/openstudio
+        conan user -p ${{ secrets.CONAN_PASSWORD }} -r nrel ${{ secrets.CONAN_LOGIN_USERNAME }}
+
+    - name: Install System dependencies
+      shell: bash
+      run: |
+        set -x
+        if [ "$RUNNER_OS" == "Linux" ]; then
+          echo "Using Apt to install ninja"
+          sudo apt update
+          sudo apt install ninja-build
+          echo CMAKE_GENERATOR='Ninja' >> $GITHUB_ENV
+          # Use preinstalled gcc-10 to support C++20
+          #echo CC=gcc-10 >> $GITHUB_ENV
+          #echo CXX=g++-10 >> $GITHUB_ENV
+        elif [ "$RUNNER_OS" == "macOS" ]; then
+          echo "Setting up MACOSX_DEPLOYMENT_TARGET and SDKROOT"
+          echo MACOSX_DEPLOYMENT_TARGET=${{ matrix.MACOSX_DEPLOYMENT_TARGET }} >> $GITHUB_ENV
+          echo SDKROOT=${{ matrix.SDKROOT }} >> $GITHUB_ENV
+          # The MACOSX_DEPLOYMENT_TARGET environment variable sets the default value for the CMAKE_OSX_DEPLOYMENT_TARGET variable.
+          echo "Using brew to install ninja"
+          brew install ninja
+          echo CMAKE_GENERATOR='Ninja' >> $GITHUB_ENV
+
+          if [ "$RUNNER_OS" == "macOS" ]; then
+            echo PKG_CONFIG_PATH="$(brew --prefix openssl@1.1)/lib/pkgconfig" >> $GITHUB_ENV
+          fi;
+
+        elif [ "$RUNNER_OS" == "Windows" ]; then
+          #echo "Setting CMAKE_GENERATOR options equivalent to ='-G \"Visual Studio 16 2019\" -A x64'"
+          #echo CMAKE_GENERATOR='Visual Studio 16 2019' >> $GITHUB_ENV
+          #echo CMAKE_GENERATOR_PLATFORM=x64 >> $GITHUB_ENV
+          echo "Using chocolatey to install ninja"
+          choco install ninja
+          # C:\Program Files (x86)\Microsoft Visual Studio\2019\Enterprise
+          MSVC_DIR=$(vswhere -products '*' -requires Microsoft.Component.MSBuild -property installationPath -latest)
+          echo "Latest is: $MSVC_DIR"
+          echo "MSVC_DIR=$MSVC_DIR" >> $GITHUB_ENV
+          # add folder containing vcvarsall.bat
+          echo "$MSVC_DIR\VC\Auxiliary\Build" >> $GITHUB_PATH
+        fi;
+
+    - name: Create Build Directory
+      run: cmake -E make_directory ./build/
+
+    - name: Configure CMake (Windows)
+      working-directory: ./build
+      if: runner.os == 'Windows'
+      shell: cmd
+      run: |
+        echo "Using vcvarsall to initialize the development environment"
+        call vcvarsall.bat x64
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING:BOOL=ON -DDBUILD_BENCHMARK:BOOL=ON ../
+
+    - name: Configure CMake (Unix)
+      working-directory: ./build
+      if: runner.os != 'Windows'
+      shell: bash
+      run: |
+        set -x
+        cmake -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING:BOOL=ON -DDBUILD_BENCHMARK:BOOL=ON ../
+
+
+    - name: list conan packages
+      shell: bash
+      run: |
+        conan search
+
+    - name: upload all to NREL's remote
+      shell: bash
+      run: |
+        echo "Turned off for now"
+        # conan upload "*" --all -r nrel --all --parallel --no-overwrite all
+
