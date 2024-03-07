@@ -14,6 +14,7 @@ namespace model {
 
   class ModelObjectList;
   class TableIndependentVariable;
+  class TableLookupPoint;
 
   namespace detail {
 
@@ -100,6 +101,14 @@ namespace model {
 
       bool setIndependentVariableList(const boost::optional<ModelObjectList>& modelObjectList);
       void resetIndependentVariableList();
+
+      // Check that the product of the independent variable(s) sizes matches the size of the output Values
+      bool validate() const;
+      std::vector<TableLookupPoint> points() const;
+
+      boost::optional<double> yValue(const std::vector<double>& xValues) const;
+
+      static bool xValuesEqual(const std::vector<double>& a, const std::vector<double>& b);
 
       //@}
      protected:

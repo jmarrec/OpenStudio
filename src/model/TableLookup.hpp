@@ -21,6 +21,28 @@ namespace model {
 
   }  // namespace detail
 
+  /** This class implements a single point of a TableMultiVariableLookup */
+  class MODEL_API TableLookupPoint
+  {
+   public:
+    TableLookupPoint(std::vector<double> x, double y);
+    TableLookupPoint(double x1, double yValue);
+    TableLookupPoint(double x1, double x2, double yValue);
+    TableLookupPoint(double x1, double x2, double x3, double yValue);
+    TableLookupPoint(double x1, double x2, double x3, double x4, double yValue);
+    TableLookupPoint(double x1, double x2, double x3, double x4, double x5, double yValue);
+
+    std::vector<double> x() const;
+    double y() const;
+
+    // this operator is to support sorting of TableLookupPoint in the order required by EnergyPlus Table:Lookup object
+    bool operator<(const TableLookupPoint& other) const;
+
+   private:
+    std::vector<double> m_x;
+    double m_y;
+  };
+
   /** TableLookup is a Curve that wraps the OpenStudio IDD object 'OS:Table:Lookup'. */
   class MODEL_API TableLookup : public Curve
   {
@@ -95,6 +117,9 @@ namespace model {
     bool removeIndependentVariable(const TableIndependentVariable& tableIndependentVariable);
     void removeAllIndependentVariables();
     std::vector<TableIndependentVariable> independentVariables() const;
+
+    /** Return the y value corresponding to xValues. If no value then return boost::none */
+    boost::optional<double> yValue(const std::vector<double>& xValues) const;
 
     //@}
    protected:

@@ -806,17 +806,16 @@ namespace model {
 
   // DEPRECATED
   double HeatExchangerAirToAirSensibleAndLatent::sensibleEffectivenessat75HeatingAirFlow() const {
-    DEPRECATED_AT_MSG(3, 8, 0, "As of EnergyPlus 24.1.0, this property ...");
-    if (boost::optional<TableLookup> sensibleEffectivenessofHeatingAirFlowCurve_ =
-          sensibleEffectivenessofHeatingAirFlowCurve()->optionalCast<TableLookup>()) {
-      return sensibleEffectivenessofHeatingAirFlowCurve_->outputValues()[0];
-    } else {
-      return getImpl<detail::HeatExchangerAirToAirSensibleAndLatent_Impl>()->sensibleEffectivenessat100HeatingAirFlow();
+    DEPRECATED_AT_MSG(3, 8, 0, "Use sensibleEffectivenessofHeatingAirFlowCurve instead.");
+    if (auto curve_ = sensibleEffectivenessofHeatingAirFlowCurve()) {
+      return curve_->evaluate(0.75);
     }
+
+    return getImpl<detail::HeatExchangerAirToAirSensibleAndLatent_Impl>()->sensibleEffectivenessat100HeatingAirFlow();
   }
 
   double HeatExchangerAirToAirSensibleAndLatent::latentEffectivenessat75HeatingAirFlow() const {
-    DEPRECATED_AT_MSG(3, 8, 0, "As of EnergyPlus 24.1.0, this property ...");
+    DEPRECATED_AT_MSG(3, 8, 0, "use latentEffectivenessofHeatingAirFlowCurve instead.");
     if (boost::optional<TableLookup> latentEffectivenessofHeatingAirFlowCurve_ =
           latentEffectivenessofHeatingAirFlowCurve()->optionalCast<TableLookup>()) {
       return latentEffectivenessofHeatingAirFlowCurve_->outputValues()[0];
@@ -826,7 +825,7 @@ namespace model {
   }
 
   double HeatExchangerAirToAirSensibleAndLatent::sensibleEffectivenessat75CoolingAirFlow() const {
-    DEPRECATED_AT_MSG(3, 8, 0, "As of EnergyPlus 24.1.0, this property ...");
+    DEPRECATED_AT_MSG(3, 8, 0, "Use sensibleEffectivenessofCoolingAirFlowCurve instead.");
     if (boost::optional<TableLookup> sensibleEffectivenessofCoolingAirFlowCurve_ =
           sensibleEffectivenessofCoolingAirFlowCurve()->optionalCast<TableLookup>()) {
       return sensibleEffectivenessofCoolingAirFlowCurve_->outputValues()[0];
@@ -836,7 +835,7 @@ namespace model {
   }
 
   double HeatExchangerAirToAirSensibleAndLatent::latentEffectivenessat75CoolingAirFlow() const {
-    DEPRECATED_AT_MSG(3, 8, 0, "As of EnergyPlus 24.1.0, this property ...");
+    DEPRECATED_AT_MSG(3, 8, 0, "Use latentEffectivenessofCoolingAirFlowCurve instead.");
     if (boost::optional<TableLookup> latentEffectivenessofCoolingAirFlowCurve_ =
           latentEffectivenessofCoolingAirFlowCurve()->optionalCast<TableLookup>()) {
       return latentEffectivenessofCoolingAirFlowCurve_->outputValues()[0];

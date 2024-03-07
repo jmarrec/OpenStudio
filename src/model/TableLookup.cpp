@@ -13,6 +13,7 @@
 #include "Model.hpp"
 #include "Model_Impl.hpp"
 
+#include "../utilities/math/FloatCompare.hpp"
 #include "../utilities/idf/IdfExtensibleGroup.hpp"
 #include <utilities/idd/IddFactory.hxx>
 
@@ -29,6 +30,64 @@
 
 namespace openstudio {
 namespace model {
+
+  TableLookupPoint::TableLookupPoint(std::vector<double> x, double y) : m_x(std::move(x)), m_y(y){};
+
+  TableLookupPoint::TableLookupPoint(double x1, double yValue) : m_x(std::vector<double>{x1}), m_y(yValue){};
+
+  TableLookupPoint::TableLookupPoint(double x1, double x2, double yValue) : m_x(std::vector<double>{x1, x2}), m_y(yValue){};
+  TableLookupPoint::TableLookupPoint(double x1, double x2, double x3, double yValue) : m_x(std::vector<double>{x1, x2, x3}), m_y(yValue){};
+  TableLookupPoint::TableLookupPoint(double x1, double x2, double x3, double x4, double yValue)
+    : m_x(std::vector<double>{x1, x2, x3, x4}), m_y(yValue){};
+  TableLookupPoint::TableLookupPoint(double x1, double x2, double x3, double x4, double x5, double yValue)
+    : m_x(std::vector<double>{x1, x2, x3, x4, x5}), m_y(yValue){};
+
+  std::vector<double> TableLookupPoint::x() const {
+    return m_x;
+  }
+
+  double TableLookupPoint::y() const {
+    return m_y;
+  }
+
+  bool TableLookupPoint::operator<(const TableLookupPoint& other) const {
+    auto n = m_x.size();
+    auto other_x = other.x();
+    if (n != other_x.size()) {
+      LOG_FREE_AND_THROW("TableLookupPoint", "Cannot compare points of different size " << n << " and " << other_x.size());
+    }
+
+    for (size_t i = 0; i < n; ++i) {
+      if (m_x[i] < other_x[i]) {
+        return true;
+      } else if (m_x[i] > other_x[i]) {
+        return false;
+      }
+    }
+
+    return false;
+  }
+
+  std::ostream& operator<<(std::ostream& out, const openstudio::model::TableLookupPoint& point) {
+    std::vector<double> xValues = point.x();
+    std::stringstream ss_left;
+    std::stringstream ss_right;
+    int i = 1;
+    ss_left << "(";
+    ss_right << "(";
+
+    for (const double& x : xValues) {
+      ss_left << "x" << i << ", ";
+      ss_right << x << ", ";
+      ++i;
+    }
+
+    ss_left << "y)";
+    ss_right << point.y() << ")";
+
+    out << ss_left.str() << " = " << ss_right.str();
+    return out;
+  }
 
   namespace detail {
 
@@ -62,8 +121,122 @@ namespace model {
       return independentVariables().size();
     }
 
-    double TableLookup_Impl::evaluate(const std::vector<double>& /*independentVariables*/) const {
-      LOG(Warn, "Curve evaluation isn't implemented for TableLookup");
+    bool TableLookup_Impl::validate() const {
+
+      auto indVars = independentVariables();
+      auto outVals = outputValues();
+
+      if (indVars.empty() || outVals.empty()) {
+        LOG(Warn, briefDescription() << " has no independent variables and/or outputValues.");
+      }
+
+      size_t prod = indVars.empty() ? 0 : 1;
+      for (const auto& independentVariable : indVars) {
+        prod *= independentVariable.values().size();
+      }
+      const size_t outSize = outVals.size();
+      auto ok = prod == outSize;
+      if (!ok) {
+        LOG(Warn, briefDescription() << ": Mistmatch between the number of output values (" << outSize
+                                     << ") and the product of the size of the independent variables(" << prod << ").");
+      }
+      return ok;
+    }
+
+    // itertools.product equivalent
+    std::vector<std::vector<double>> cart_product(const std::vector<std::vector<double>>& in) {
+      // note: this creates a vector containing one empty vector
+      std::vector<std::vector<double>> results = {{}};
+      for (const auto& new_values : in) {
+        // helper vector so that we don't modify results while iterating
+        std::vector<std::vector<double>> next_results;
+        for (const auto& result : results) {
+          for (const auto value : new_values) {
+            next_results.push_back(result);
+            next_results.back().push_back(value);
+          }
+        }
+        results = std::move(next_results);
+      }
+      return results;
+    }
+
+    std::vector<TableLookupPoint> TableLookup_Impl::points() const {
+      if (!validate()) {
+        return {};
+      }
+
+      std::vector<std::vector<double>> vvs;
+      for (const auto& independentVariable : independentVariables()) {
+        vvs.emplace_back(independentVariable.values());
+      }
+      auto xss = cart_product(vvs);
+      auto outVals = outputValues();
+      OS_ASSERT(xss.size() == outVals.size());
+
+      auto normMethod = normalizationMethod();
+
+      std::vector<TableLookupPoint> result;
+      for (size_t i = 0; i < outVals.size(); ++i) {
+        double outVal = outVals[i];
+        if (istringEqual(normMethod, "None")) {
+          // No-op
+        } else if (istringEqual(normMethod, "DivisorOnly")) {
+          outVal /= normalizationDivisor();
+        } else if (istringEqual(normMethod, "AutomaticWithDivisor")) {
+        }
+        result.emplace_back(xss[i], outVals[i]);
+      }
+
+      return result;
+    }
+
+    bool TableLookup_Impl::xValuesEqual(const std::vector<double>& a, const std::vector<double>& b) {
+      bool result = true;
+
+      if (a.size() != b.size()) {
+        result = false;
+      } else {
+        for (auto it1 = a.begin(), it2 = b.begin(); it1 != a.end() && it2 != b.end(); ++it1, ++it2) {
+          if (!equal(*it1, *it2)) {
+            result = false;
+          }
+        }
+      }
+
+      return result;
+    }
+
+    boost::optional<double> TableLookup_Impl::yValue(const std::vector<double>& xValues) const {
+
+      if (xValues.size() != numVariables()) {
+        LOG(Warn, briefDescription() << ": Mistmatch between the number of xValues given (" << xValues.size()
+                                     << ") and the number independent variables(" << numVariables() << ").");
+        return boost::none;
+      }
+
+      boost::optional<double> result;
+
+      for (const auto& pt : points()) {
+        if (xValuesEqual(pt.x(), xValues)) {
+          result = pt.y();
+          break;
+        }
+      }
+
+      return result;
+    }
+
+    double TableLookup_Impl::evaluate(const std::vector<double>& independentVariables) const {
+      if (independentVariables.size() != numVariables()) {
+        LOG_AND_THROW(briefDescription() << " has " << numVariables() << " independentVariables but you passed " << independentVariables.size()
+                                         << " variables.");
+      }
+      // TODO: handle Normalization Method
+      if (auto val_ = yValue(independentVariables)) {
+        if (istringEqual(normalizationMethod(), "DivisorOnly")) return val_.get();
+      }
+      LOG(Warn, "Curve evaluation isn't implemented for TableLookup when the exact xValues do not match");
       return -9999.0;
     }
 
