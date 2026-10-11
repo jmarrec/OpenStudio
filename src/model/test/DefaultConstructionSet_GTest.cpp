@@ -30,6 +30,8 @@
 
 #include "../../utilities/geometry/Point3d.hpp"
 
+#include <utilities/idd/IddEnums.hxx>
+
 using namespace openstudio;
 using namespace openstudio::model;
 
@@ -749,6 +751,22 @@ TEST_F(ModelFixture, DefaultConstructionSet_collapseToSpaceAndBuilding_BuildingG
     EXPECT_FALSE(spaceType.defaultConstructionSet());
     EXPECT_EQ(2u, m.getConcreteModelObjects<DefaultConstructionSet>().size());
     EXPECT_EQ(2u, m.getConcreteModelObjects<DefaultSurfaceConstructions>().size());
+
+    // The SpaceType's DCS is not removed, just no longer referenced
+    EXPECT_EQ(0u, stDCS.directUseCount());
+    EXPECT_EQ(1u, stExt.directUseCount());  // still used by stDCS
+    EXPECT_EQ(1u, bDCS.directUseCount());
+
+    // Purging takes care of it, then of its now unused DefaultSurfaceConstructions
+    EXPECT_EQ(1u, m.purgeUnusedResourceObjects(IddObjectType::OS_DefaultConstructionSet).size());
+    EXPECT_TRUE(stDCS.handle().isNull());
+    EXPECT_EQ(1u, m.getConcreteModelObjects<DefaultConstructionSet>().size());
+    EXPECT_EQ(0u, stExt.directUseCount());
+
+    EXPECT_EQ(1u, m.purgeUnusedResourceObjects(IddObjectType::OS_DefaultSurfaceConstructions).size());
+    EXPECT_TRUE(stExt.handle().isNull());
+    ASSERT_EQ(1u, m.getConcreteModelObjects<DefaultSurfaceConstructions>().size());
+    EXPECT_EQ(bExt, m.getConcreteModelObjects<DefaultSurfaceConstructions>().front());
   }
 
   // Both, and the SpaceType DCS fills slots the Building DCS doesn't: a merged clone is created, Building's slots win,
