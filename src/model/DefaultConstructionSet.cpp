@@ -46,6 +46,7 @@
 #include <bitset>
 #include <iterator>
 #include <map>
+#include <set>
 #include <string>
 #include <string_view>
 #include <type_traits>
@@ -1044,7 +1045,8 @@ namespace model {
     }
 
     // Remove the sets this left unused, then their sub-objects if nothing else (e.g. a merged set) still uses them
-    std::vector<ResourceObject> subObjects;
+    // A set, since two removed sets can share a sub-object
+    std::set<ResourceObject> subObjects;
     for (auto& dcs : usedBefore) {
       if (dcs.directUseCount() > 0) {
         continue;
@@ -1052,20 +1054,20 @@ namespace model {
       for (const auto& d_ :
            {dcs.defaultExteriorSurfaceConstructions(), dcs.defaultInteriorSurfaceConstructions(), dcs.defaultGroundContactSurfaceConstructions()}) {
         if (d_) {
-          subObjects.push_back(*d_);
+          subObjects.insert(*d_);
         }
       }
       for (const auto& d_ : {dcs.defaultExteriorSubSurfaceConstructions(), dcs.defaultInteriorSubSurfaceConstructions()}) {
         if (d_) {
-          subObjects.push_back(*d_);
+          subObjects.insert(*d_);
         }
       }
       LOG_FREE(Trace, collapseLogChannel, "Removing DefaultConstructionSet '" << dcs.nameString() << "', no longer used");
       dcs.remove();
     }
-    for (auto& subObject : subObjects) {
-      // Already removed if listed twice (shared by two removed sets)
-      if (!subObject.handle().isNull() && subObject.directUseCount() == 0) {
+    // Copy (cheap handle wrapper): set elements are const, and remove() isn't
+    for (auto subObject : subObjects) {  // NOLINT(performance-for-range-copy)
+      if (subObject.directUseCount() == 0) {
         subObject.remove();
       }
     }
