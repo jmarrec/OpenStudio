@@ -982,8 +982,22 @@ namespace model {
   //                 Space Group                                     Building Group
   //
   // Each group only reads its own levels' sets (the Space group never reads the Building's), and SpaceType / BuildingStory sets
-  // are only reset at the end, so assigning as we go is safe. Originals are never mutated.
-  std::vector<DefaultConstructionSet> DefaultConstructionSet::collapseToSpaceAndBuilding(Model& model) {
+  // are only reset at the very end (if purging), so assigning as we go is safe. Originals are never mutated.
+  //
+  // Leaving the SpaceType / BuildingStory sets in place doesn't change any surface's construction nor search distance: the
+  // slots of a collapsed set are the union of the slots of its group's sets, so a slot that falls through the Space's set falls
+  // through its SpaceType's and BuildingStory's too.
+  std::vector<DefaultConstructionSet> DefaultConstructionSet::collapseToSpaceAndBuilding(Model& model, bool purge) {
+
+    // Sets in use before the call: the only ones a purge may remove
+    std::vector<DefaultConstructionSet> usedBefore;
+    if (purge) {
+      for (auto& dcs : model.getConcreteModelObjects<DefaultConstructionSet>()) {
+        if (dcs.directUseCount() > 0) {
+          usedBefore.push_back(std::move(dcs));
+        }
+      }
+    }
 
     Resolver resolver(model);
 
@@ -1016,12 +1030,44 @@ namespace model {
       }
     }
 
-    // Drop the intermediate levels so the lookup is Space -> Building, same as E+ (includes the Building's SpaceType)
+    if (!purge) {
+      return resolver.created();
+    }
+
+    // Drop the intermediate levels so the model looks like E+: sets only on Spaces and the Building (includes the Building's
+    // SpaceType)
     for (auto& spaceType : model.getConcreteModelObjects<SpaceType>()) {
       spaceType.resetDefaultConstructionSet();
     }
     for (auto& story : model.getConcreteModelObjects<BuildingStory>()) {
       story.resetDefaultConstructionSet();
+    }
+
+    // Remove the sets this left unused, then their sub-objects if nothing else (e.g. a merged set) still uses them
+    std::vector<ResourceObject> subObjects;
+    for (auto& dcs : usedBefore) {
+      if (dcs.directUseCount() > 0) {
+        continue;
+      }
+      for (const auto& d_ :
+           {dcs.defaultExteriorSurfaceConstructions(), dcs.defaultInteriorSurfaceConstructions(), dcs.defaultGroundContactSurfaceConstructions()}) {
+        if (d_) {
+          subObjects.push_back(*d_);
+        }
+      }
+      for (const auto& d_ : {dcs.defaultExteriorSubSurfaceConstructions(), dcs.defaultInteriorSubSurfaceConstructions()}) {
+        if (d_) {
+          subObjects.push_back(*d_);
+        }
+      }
+      LOG_FREE(Trace, collapseLogChannel, "Removing DefaultConstructionSet '" << dcs.nameString() << "', no longer used");
+      dcs.remove();
+    }
+    for (auto& subObject : subObjects) {
+      // Already removed if listed twice (shared by two removed sets)
+      if (!subObject.handle().isNull() && subObject.directUseCount() == 0) {
+        subObject.remove();
+      }
     }
 
     return resolver.created();
