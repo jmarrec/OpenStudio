@@ -67,6 +67,8 @@
 #include <iterator>
 #include <map>
 #include <string>
+#include <string_view>
+#include <type_traits>
 #include <utility>
 #include <vector>
 
@@ -133,10 +135,32 @@ namespace model {
       std::string owner;   // e.g. "SpaceType Office", used for the merged set name and logging
     };
 
-    void push(std::vector<ChainItem>& chain, const boost::optional<DefaultConstructionSet>& dcs_, const ModelObject& owner,
-              const std::string& ownerKind) {
-      if (dcs_) {
-        chain.push_back({*dcs_, owner.handle(), ownerKind + " " + owner.nameString()});
+    template <typename T>
+    constexpr std::string_view ownerKind() {
+      if constexpr (std::is_same_v<T, Space>) {
+        return "Space";
+      } else if constexpr (std::is_same_v<T, SpaceType>) {
+        return "SpaceType";
+      } else if constexpr (std::is_same_v<T, BuildingStory>) {
+        return "BuildingStory";
+      } else {
+        static_assert(std::is_same_v<T, Building>, "Only Space, SpaceType, BuildingStory and Building own a DefaultConstructionSet");
+        return "Building";
+      }
+    }
+
+    /// Append the owner's DefaultConstructionSet, if any, to the chain
+    template <typename T>
+    void push(std::vector<ChainItem>& chain, const T& owner) {
+      if (auto dcs_ = owner.defaultConstructionSet()) {
+        chain.push_back({*dcs_, owner.handle(), std::string{ownerKind<T>()} + " " + owner.nameString()});
+      }
+    }
+
+    template <typename T>
+    void push(std::vector<ChainItem>& chain, const boost::optional<T>& owner_) {
+      if (owner_) {
+        push(chain, *owner_);
       }
     }
 
@@ -211,10 +235,8 @@ namespace model {
     // Building group. model.building(), not getUniqueModelObject, so we don't instantiate a Building
     if (auto building_ = model.building()) {
       std::vector<ChainItem> chain;
-      push(chain, building_->defaultConstructionSet(), *building_, "Building");
-      if (auto st_ = building_->spaceType()) {
-        push(chain, st_->defaultConstructionSet(), *st_, "SpaceType");
-      }
+      push(chain, *building_);
+      push(chain, building_->spaceType());
       if (auto dcs_ = resolver.resolve("Building", std::move(chain))) {
         building_->setDefaultConstructionSet(*dcs_);
       } else {
@@ -226,15 +248,11 @@ namespace model {
     for (auto& space : model.getConcreteModelObjects<Space>()) {
       const std::string groupName = "Space '" + space.nameString() + "'";
       std::vector<ChainItem> chain;
-      push(chain, space.defaultConstructionSet(), space, "Space");
+      push(chain, space);
       if (!space.isSpaceTypeDefaulted()) {  // defaulted == Building's SpaceType, which is in the Building group
-        if (auto st_ = space.spaceType()) {
-          push(chain, st_->defaultConstructionSet(), *st_, "SpaceType");
-        }
+        push(chain, space.spaceType());
       }
-      if (auto story_ = space.buildingStory()) {
-        push(chain, story_->defaultConstructionSet(), *story_, "BuildingStory");
-      }
+      push(chain, space.buildingStory());
 
       if (auto dcs_ = resolver.resolve(groupName, std::move(chain))) {
         space.setDefaultConstructionSet(*dcs_);  // no-op when it's the Space's own
