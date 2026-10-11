@@ -37,9 +37,9 @@
 //     reset at the end, so assigning as we go is safe.
 //
 // Not handled here:
-//   * ShadingSurfaces: E+ has no shading slot, their constructions must be written explicitly. Shading slots are still counted
-//     in the masks so the OS model stays consistent. If shading constructions get hard-assigned BEFORE this runs, set
-//     countShadingSlots = false to prune more.
+//   * ShadingSurfaces: E+ has no shading slot, their constructions must be written explicitly. With
+//     countShadingSlots = true, shading slots count when pruning, so OS shading surfaces keep resolving the same. Once shading
+//     constructions get hard-assigned BEFORE this runs, set it to false to prune more.
 //   * Boundary conditions where the OS and E+ slot differ (GroundFCfactorMethod, Foundation, OtherSideCoefficients, ...):
 //     handled by writing the construction explicitly on those surfaces.
 
@@ -77,11 +77,12 @@ namespace model {
 
     constexpr auto logChannel = "openstudio.model.ConvertDCSToEnergyPlus";
 
-    // 3 surface categories x 3 types, 2 sub-surface categories x 8 types, then interior partition, 3 shading, adiabatic
-    constexpr size_t nSlots = (3 * 3) + (2 * 8) + 5;
-    constexpr size_t firstShadingSlot = (3 * 3) + (2 * 8) + 1;  // space, building, site shading
-    constexpr size_t nShadingSlots = 3;
+    // Set to false once shading constructions are hard-assigned before this runs: E+ has no shading slot, so a DCS that only
+    // contributes shading constructions shouldn't keep a level in the chain
     constexpr bool countShadingSlots = true;
+
+    // 3 surface categories x 3 types, 2 sub-surface categories x 8 types, interior partition, [space, building, site shading], adiabatic
+    constexpr size_t nSlots = (3 * 3) + (2 * 8) + 1 + (countShadingSlots ? 3 : 0) + 1;
 
     using SlotConstructions = std::array<boost::optional<ConstructionBase>, nSlots>;
     using SlotMask = std::bitset<nSlots>;
@@ -116,9 +117,11 @@ namespace model {
       }
 
       result[i++] = dcs.interiorPartitionConstruction();
-      result[i++] = dcs.spaceShadingConstruction();
-      result[i++] = dcs.buildingShadingConstruction();
-      result[i++] = dcs.siteShadingConstruction();
+      if constexpr (countShadingSlots) {
+        result[i++] = dcs.spaceShadingConstruction();
+        result[i++] = dcs.buildingShadingConstruction();
+        result[i++] = dcs.siteShadingConstruction();
+      }
       result[i++] = dcs.adiabaticSurfaceConstruction();
 
       return result;
@@ -128,11 +131,6 @@ namespace model {
       SlotMask mask;
       for (size_t i = 0; i < nSlots; ++i) {
         mask[i] = slots[i].has_value();
-      }
-      if constexpr (!countShadingSlots) {
-        for (size_t i = firstShadingSlot; i < firstShadingSlot + nShadingSlots; ++i) {
-          mask[i] = false;
-        }
       }
       return mask;
     }
