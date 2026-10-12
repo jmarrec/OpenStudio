@@ -686,7 +686,7 @@ TEST_F(ModelFixture, DefaultConstructionSet_collapseToSpaceAndBuilding_BuildingG
     EXPECT_EQ(1u, m.getConcreteModelObjects<DefaultConstructionSet>().size());  // not removed, just no longer referenced
   }
 
-  // Building SpaceType DCS only: moved up to the Building, no clone, and the SpaceType's is reset
+  // Building SpaceType DCS only: moved up to the Building, no clone. The SpaceType keeps it (no purge)
   {
     Model m;
     auto building = m.getUniqueModelObject<Building>();
@@ -700,11 +700,12 @@ TEST_F(ModelFixture, DefaultConstructionSet_collapseToSpaceAndBuilding_BuildingG
     EXPECT_TRUE(DefaultConstructionSet::collapseToSpaceAndBuilding(m).empty());
     ASSERT_TRUE(building.defaultConstructionSet());
     EXPECT_EQ(stDCS, building.defaultConstructionSet().get());
-    EXPECT_FALSE(spaceType.defaultConstructionSet());
+    ASSERT_TRUE(spaceType.defaultConstructionSet());
+    EXPECT_EQ(stDCS, spaceType.defaultConstructionSet().get());
     EXPECT_EQ(1u, m.getConcreteModelObjects<DefaultConstructionSet>().size());
   }
 
-  // Both point to the same DCS: kept as is, the SpaceType's is reset
+  // Both point to the same DCS: kept as is
   {
     Model m;
     auto building = m.getUniqueModelObject<Building>();
@@ -719,7 +720,8 @@ TEST_F(ModelFixture, DefaultConstructionSet_collapseToSpaceAndBuilding_BuildingG
     EXPECT_TRUE(DefaultConstructionSet::collapseToSpaceAndBuilding(m).empty());
     ASSERT_TRUE(building.defaultConstructionSet());
     EXPECT_EQ(dcs, building.defaultConstructionSet().get());
-    EXPECT_FALSE(spaceType.defaultConstructionSet());
+    ASSERT_TRUE(spaceType.defaultConstructionSet());
+    EXPECT_EQ(dcs, spaceType.defaultConstructionSet().get());
     EXPECT_EQ(1u, m.getConcreteModelObjects<DefaultConstructionSet>().size());
   }
 
@@ -748,25 +750,35 @@ TEST_F(ModelFixture, DefaultConstructionSet_collapseToSpaceAndBuilding_BuildingG
     EXPECT_TRUE(DefaultConstructionSet::collapseToSpaceAndBuilding(m).empty());
     ASSERT_TRUE(building.defaultConstructionSet());
     EXPECT_EQ(bDCS, building.defaultConstructionSet().get());
-    EXPECT_FALSE(spaceType.defaultConstructionSet());
     EXPECT_EQ(2u, m.getConcreteModelObjects<DefaultConstructionSet>().size());
     EXPECT_EQ(2u, m.getConcreteModelObjects<DefaultSurfaceConstructions>().size());
 
-    // The SpaceType's DCS is not removed, just no longer referenced
-    EXPECT_EQ(0u, stDCS.directUseCount());
-    EXPECT_EQ(1u, stExt.directUseCount());  // still used by stDCS
+    // No purge: the SpaceType keeps its DCS
+    ASSERT_TRUE(spaceType.defaultConstructionSet());
+    EXPECT_EQ(stDCS, spaceType.defaultConstructionSet().get());
+    EXPECT_EQ(1u, stDCS.directUseCount());
+    EXPECT_EQ(1u, stExt.directUseCount());
     EXPECT_EQ(1u, bDCS.directUseCount());
 
-    // Purging takes care of it, then of its now unused DefaultSurfaceConstructions
-    EXPECT_EQ(1u, m.purgeUnusedResourceObjects(IddObjectType::OS_DefaultConstructionSet).size());
-    EXPECT_TRUE(stDCS.handle().isNull());
-    EXPECT_EQ(1u, m.getConcreteModelObjects<DefaultConstructionSet>().size());
-    EXPECT_EQ(0u, stExt.directUseCount());
+    // A DCS that was already unused before the call must survive a purge
+    DefaultConstructionSet unusedDCS(m);
+    DefaultSurfaceConstructions unusedExt(m);
+    EXPECT_TRUE(unusedDCS.setDefaultExteriorSurfaceConstructions(unusedExt));
+    EXPECT_EQ(0u, unusedDCS.directUseCount());
 
-    EXPECT_EQ(1u, m.purgeUnusedResourceObjects(IddObjectType::OS_DefaultSurfaceConstructions).size());
+    // Collapsing again with purge: same result for the Building, then the SpaceType's DCS is reset and removed, along with
+    // its now unused DefaultSurfaceConstructions
+    EXPECT_TRUE(DefaultConstructionSet::collapseToSpaceAndBuilding(m, true).empty());
+    ASSERT_TRUE(building.defaultConstructionSet());
+    EXPECT_EQ(bDCS, building.defaultConstructionSet().get());
+    EXPECT_FALSE(spaceType.defaultConstructionSet());
+    EXPECT_TRUE(stDCS.handle().isNull());
     EXPECT_TRUE(stExt.handle().isNull());
-    ASSERT_EQ(1u, m.getConcreteModelObjects<DefaultSurfaceConstructions>().size());
-    EXPECT_EQ(bExt, m.getConcreteModelObjects<DefaultSurfaceConstructions>().front());
+
+    EXPECT_FALSE(unusedDCS.handle().isNull());
+    EXPECT_FALSE(unusedExt.handle().isNull());
+    EXPECT_EQ(2u, m.getConcreteModelObjects<DefaultConstructionSet>().size());       // bDCS, unusedDCS
+    EXPECT_EQ(2u, m.getConcreteModelObjects<DefaultSurfaceConstructions>().size());  // bExt, unusedExt
   }
 
   // Both, and the SpaceType DCS fills slots the Building DCS doesn't: a merged clone is created, Building's slots win,
@@ -806,7 +818,8 @@ TEST_F(ModelFixture, DefaultConstructionSet_collapseToSpaceAndBuilding_BuildingG
 
     ASSERT_TRUE(building.defaultConstructionSet());
     EXPECT_EQ(merged, building.defaultConstructionSet().get());
-    EXPECT_FALSE(spaceType.defaultConstructionSet());
+    ASSERT_TRUE(spaceType.defaultConstructionSet());
+    EXPECT_EQ(stDCS, spaceType.defaultConstructionSet().get());
 
     // Merged content: Building's wall wins, roof and adiabatic come from the SpaceType
     ASSERT_TRUE(merged.defaultExteriorSurfaceConstructions());
